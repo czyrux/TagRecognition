@@ -1,7 +1,5 @@
 #include "opencv-image.h"
 
-
-
 /**************************************/
 
 IplImage* loadPixelsFilter(int* pixels, int width, int height) {

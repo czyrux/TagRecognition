@@ -1,7 +1,6 @@
 obj/local/armeabi/objs/opencv/opencv-image.o: jni/opencv-image.cpp \
  jni/opencv-image.h \
  /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/jni.h \
- /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h \
  /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/stdint.h \
  /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/sys/_types.h \
  /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/machine/_types.h \
@@ -95,13 +94,13 @@ obj/local/armeabi/objs/opencv/opencv-image.o: jni/opencv-image.cpp \
  /Users/czyrux/android-ndk/sources/cxx-stl/gnu-libstdc++/include/deque \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/legacy/compat.hpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/core/internal.hpp \
- /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h
+ /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h \
+ jni/log.h \
+ /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h
 
 jni/opencv-image.h:
 
 /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/jni.h:
-
-/Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h:
 
 /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/stdint.h:
 
@@ -290,3 +289,7 @@ jni/opencv-image.h:
 /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/core/internal.hpp:
 
 /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h:
+
+jni/log.h:
+
+/Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h:

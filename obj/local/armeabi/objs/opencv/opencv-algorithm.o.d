@@ -51,7 +51,6 @@ obj/local/armeabi/objs/opencv/opencv-algorithm.o: \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/nonfree/features2d.hpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui.hpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui_c.h \
- /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cv.h \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/imgproc/imgproc_c.h \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/video/tracking.hpp \
@@ -99,7 +98,10 @@ obj/local/armeabi/objs/opencv/opencv-algorithm.o: \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/legacy/compat.hpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/core/internal.hpp \
  jni/opencv-image.h \
- /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h
+ /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h \
+ jni/log.h \
+ /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h \
+ jni/opencv-squares.h
 
 /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/jni.h:
 
@@ -203,8 +205,6 @@ obj/local/armeabi/objs/opencv/opencv-algorithm.o: \
 
 /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui_c.h:
 
-/Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h:
-
 /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cv.h:
 
 /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/imgproc/imgproc_c.h:
@@ -300,3 +300,9 @@ obj/local/armeabi/objs/opencv/opencv-algorithm.o: \
 jni/opencv-image.h:
 
 /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h:
+
+jni/log.h:
+
+/Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h:
+
+jni/opencv-squares.h:
