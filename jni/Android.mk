@@ -11,7 +11,7 @@ include $(OPENCV_CONFIG)
 
 # Here we give our module name and source file(s)
 LOCAL_MODULE    := opencv
-LOCAL_SRC_FILES := ndkfoo.c opencv-image.cpp opencv-squares.cpp opencv-algorithm.cpp
+LOCAL_SRC_FILES := opencv-image.cpp opencv-squares.cpp opencv-algorithm.cpp
 
 LOCAL_LDLIBS +=  -llog -ldl
 

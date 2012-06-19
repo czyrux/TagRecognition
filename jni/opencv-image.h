@@ -7,6 +7,10 @@
 #include <cxcore.h>
 #include "log.h"
 
+
+#include <opencv2/highgui/highgui.hpp>
+
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -35,10 +39,19 @@ struct bmp_dib_v3_header_t {
   uint32_t nimpcolors;
 };
 
+struct Image_data {
+  IplImage* src;
+  IplImage* red;
+  IplImage* blue;
+  IplImage* green;
+};
+
 IplImage* loadPixels(int* pixels, int width, int height);
-IplImage* loadPixelsFilter(int* pixels, int width, int height);
-IplImage* getIplImageFromIntArray(JNIEnv* env, jintArray array_data, jint width,
-		jint height);
+Image_data* loadPixelsFilter(int* pixels, int width, int height , 
+  bool red_filter=true , bool green_filter=true , bool blue_filter=true);
+
+Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data,
+    jint width, jint height );
 jbooleanArray getBmpImage( JNIEnv* env, IplImage* pImage );
 
 #ifdef __cplusplus

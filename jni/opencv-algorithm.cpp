@@ -53,6 +53,7 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_OpenCV_extractSURFFeature(
 */
 /**************************************/
 
+/*
 JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_OpenCV_setSourceImage(
 		JNIEnv* env, jobject thiz, jintArray photo_data, jint width,
 		jint height) 
@@ -70,7 +71,7 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_OpenCV_setSourceImage(
 }
 
 /**************************************/
-
+/*
 JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_getSourceImage(
 		JNIEnv* env, jobject thiz)
 {
@@ -119,7 +120,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_getSourceIm
 }
 
 /**************************************/
-
+/*
 JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_OpenCV_releaseSourceImage(
 		JNIEnv* env, jobject thiz ) 
 {
@@ -130,11 +131,10 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_OpenCV_releaseSourceIma
 }
 
 /**************************************/
-
+/*
 JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_OpenCV_extract(
 		JNIEnv* env, jobject thiz) 
 {
-	LOGI("extract enter SIFT\n");
  	Mat img (pImage,true);
  	Mat grey;
  	cvtColor(img, grey, CV_BGR2GRAY);
@@ -176,7 +176,8 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_extractFAST
   	//FeatureDetector *detector = new SurfFeatureDetector(400.);
   	detector->detect(grey,keypoints);
   	Scalar keypointColor = Scalar(0, 0, 255);     // color keypoints.
-  	drawKeypoints(img /*original*/, keypoints, img/*result*/, keypointColor, DrawMatchesFlags::DEFAULT);
+    drawKeypoints(img_original, keypoints, img_result, keypointColor, DrawMatchesFlags::DEFAULT);
+  	drawKeypoints(img, keypoints, img, keypointColor, DrawMatchesFlags::DEFAULT);
   	
   	cvReleaseImage(&image_data);
   	//image_data = &img.operator IplImage();
@@ -194,10 +195,25 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
 		jint height) 
 {
     //load the image
-	IplImage *image_data = getIplImageFromIntArray(env, photo_data, width, height);
+    Image_data* data = getIplImageFromIntArray(env, photo_data, width, height);;
+    IplImage *image_data = data->red;
 	if (image_data == NULL) {
+        LOGE("Image data couldn't be loaded.");
 		return 0;
 	}
+    
+    Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
+    string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
+    imwrite(file1,img1);
+    file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_red.jpeg";
+    imwrite(file1,img2);
+    file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_green.jpeg";
+    imwrite(file1,img4);
+    file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_blue.jpeg";
+    imwrite(file1,img3);
+    
+
+    //Convert IplImage to Mat
  	Mat img (image_data,false); //NOT COPY OF IMAGE
  	vector<Square> squares;
   
@@ -209,7 +225,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
     //draw all squares founded
     Mat cop = img.clone();
     drawSquares(cop, squares);
-    string file = "/mnt/sdcard/Pictures/MyCameraApp/squares.jpeg";
+    string file = "/mnt/sdcard/Pictures/MyCameraApp/all_squares.jpeg";
     imwrite(file,cop);
     
     //remove squares inside others ones
@@ -222,10 +238,14 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
     drawSquares(img, squares);
 
     //cut squares
-    //vector<Mat> subsquares;
-    cutSquares(img,squares);
+    vector<Mat> subsquares;
+    cutSquares(img,squares,subsquares);
 
     //cvReleaseImage(&image_data);
+    cvReleaseImage(&data->src);
+    cvReleaseImage(&data->green);
+    cvReleaseImage(&data->blue);
+    delete data;
   	
     return getBmpImage(env,&img.operator IplImage());
 }

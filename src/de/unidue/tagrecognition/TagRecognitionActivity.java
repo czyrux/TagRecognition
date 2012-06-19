@@ -32,7 +32,7 @@ public class TagRecognitionActivity extends Activity {
 
 	private Preview mPreview;
 	// private Camera mCamera;
-	private Timer timer , timer2;
+	private Timer timer ;
 	private OpenCV opencv = new OpenCV();
 
 	/** Called when the activity is first created. */
@@ -47,12 +47,6 @@ public class TagRecognitionActivity extends Activity {
 
 		mPreview = new Preview(this); // <3>
 		((FrameLayout) findViewById(R.id.preview)).addView(mPreview); // <4>
-
-		// this is where we call the native code
-		// String hello = opencv.hello();
-		// Toast.makeText(TagRecognitionActivity.this, hello,
-		// Toast.LENGTH_SHORT).show();
-		// new AlertDialog.Builder(this).setMessage(hello).show();
 
 		timer = new Timer();
 		timer.schedule(new UpdateTimeTask(), 1000, 2000);
@@ -142,7 +136,7 @@ public class TagRecognitionActivity extends Activity {
 			
 			// Store the image
 			storeBitmap(bmpRotate, "IMG_0_");
-			storeBitmap(bmpExtract2, "IMG_1_");
+			if (bmpExtract2!=null)storeBitmap(bmpExtract2, "IMG_1_");
 
 			// Continue with the preview
 			mPreview.mCamera.startPreview();

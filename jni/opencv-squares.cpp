@@ -2,7 +2,7 @@
 
 /**************************************/
 
-Square extractSquareData (vector<Point> &p) {
+Square extractSquareData (std::vector<Point> &p) {
     //stringstream os;
     int xmin = p[0].x, ymin = p[0].y, xmax = p[0].x , ymax = p[0].y ;
     for (int i=1 ; i<p.size() ; i++) {
@@ -43,7 +43,7 @@ double angle( Point pt1, Point pt2, Point pt0 )
 
 // returns sequence of squares detected on the image.
 // the sequence is stored in the specified memory storage
-void findSquares( const Mat& image, vector<Square>& squares )
+void findSquares( const Mat& image, std::vector<Square>& squares )
 {
     squares.clear();
     Mat gray;
@@ -100,14 +100,10 @@ void findSquares( const Mat& image, vector<Square>& squares )
 /**************************************/
 
 // the function draws all the squares in the image
-void drawSquares( Mat& image, const vector<Square>& squares )
+void drawSquares( Mat& image, const std::vector<Square>& squares )
 {
     
     Point po;
-    /*po.x = 1;
-    po.y = 1;
-    circle(image, po, 5, Scalar(0,255,255),2,CV_AA);
-    */
     for( size_t i = 0; i < squares.size(); i++ )
     {
         const Point* p = &squares[i].points[0];
@@ -117,27 +113,28 @@ void drawSquares( Mat& image, const vector<Square>& squares )
         po.x = squares[i].vertex.x;
         po.y = squares[i].vertex.y;
         circle(image, po, 3, Scalar(0,255,255),2,CV_AA);
-        /*po.x = squares[i].w - squares[i].vertex.x;
-        po.y = squares[i].h - squares[i].vertex.y;
+        /*po.x = squares[i].w + squares[i].vertex.x;
+        po.y = squares[i].h + squares[i].vertex.y;
         circle(image, po, 5, Scalar(255,0,255),2,CV_AA);*/
     }
 }
 
 /**************************************/
 
-void cutSquares(Mat& image, vector<Square>& sq)
+void cutSquares(Mat& image, std::vector<Square>& sq , std::vector<Mat>& subsquares)
 {    
+    subsquares.clear();
     for ( int i=0 ; i < sq.size() ; i++ ) {
-        stringstream os;
-        os << "sub:" << i << " ";
-        os << sq[i].vertex.x<< " "<< sq[i].vertex.y<< " "<< sq[i].w+sq[i].vertex.x<< " "<<sq[i].h+sq[i].vertex.y;
-        LOGI(os.str().c_str());
-        //Mat subimg(image,cvRect(sq[i].vertex.x, sq[i].vertex.y, sq[i].w+sq[i].vertex.x, sq[i].h+sq[i].vertex.y));
+        //stringstream os;
+        //os << "sub:" << i << " ";
+        //os << sq[i].vertex.x<< " "<< sq[i].vertex.y<< " "<< sq[i].w+sq[i].vertex.x<< " "<<sq[i].h+sq[i].vertex.y;
+        //LOGI(os.str().c_str());
         Mat subimg(image,cvRect(sq[i].vertex.x, sq[i].vertex.y, sq[i].w, sq[i].h)); //AQUI EL CAMBIO
-        stringstream os1;
-        os1 << "_" << i ;
-        string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
-        imwrite(file,subimg);
+        subsquares.push_back(subimg);
+        //stringstream os1;
+        //os1 << "_" << i ;
+        //string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
+        //imwrite(file,subimg);
     }
 }
 
@@ -151,7 +148,7 @@ bool inside (const Square &a , const Square &b ) {
 }
 
 // the function draws all the squares in the image
-void filterSquares ( vector<Square>& squares)
+void filterSquares ( std::vector<Square>& squares)
 {
     vector<Square> sol;
     sol.clear();

@@ -96,7 +96,9 @@ obj/local/armeabi/objs/opencv/opencv-image.o: jni/opencv-image.cpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/core/internal.hpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h \
  jni/log.h \
- /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h
+ /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h \
+ /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui.hpp \
+ /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui_c.h
 
 jni/opencv-image.h:
 
@@ -293,3 +295,7 @@ jni/opencv-image.h:
 jni/log.h:
 
 /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h:
+
+/Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui.hpp:
+
+/Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui_c.h:

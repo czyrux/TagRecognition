@@ -51,8 +51,9 @@ public class OpenCV {
 		//call method jni
 		//byte[] imageData = this.extractFAST(pixels, width, height);
 		byte[] imageData = this.square(pixels, width, height);
-		Bitmap bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-
+		Bitmap bmp = null;
+		if (imageData != null )
+			bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
 		return bmp;
 	}
 	
