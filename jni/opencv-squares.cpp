@@ -2,27 +2,52 @@
 
 /**************************************/
 
+inline float distance ( const Point &a , const Point &b ) {
+    return sqrt((b.x-a.x)^2 + (b.y-a.y)^2);
+}
+
 Square extractSquareData (std::vector<Point> &p) {
-    //stringstream os;
-    int xmin = p[0].x, ymin = p[0].y, xmax = p[0].x , ymax = p[0].y ;
+    /*
+    (p0)  1st----2nd  (p1)
+           |      |
+           |      |
+    (p3)  4th----3rd  (p2)
+    */
+    Square sq;
+
+    //Calculate the box which involve the square
+    sq.frame = boundingRect(Mat(p));
+
+    //Take the real dimensions of square
+    /*
+    Point pt(p[0].x,p[0].y);
+    int w , h ;
+    //Take the real 
     for (int i=1 ; i<p.size() ; i++) {
-        if (p[i].x < xmin ) xmin = p[i].x;
-        if (p[i].x > xmax ) xmax = p[i].x;
-        if (p[i].y < ymin ) ymin = p[i].y;
-        if (p[i].y > ymax ) ymax = p[i].y;
+        float d = distance(p[i],pt);
+        //width of square
+        if ( d < w )
+            w = d;
+
+        //height of square
+        if ( d > h )
+            h = d;
     }
 
-    Square result;
-    result.vertex.x = xmin;
-    result.vertex.y = ymin;
-    result.w = xmax-xmin;
-    result.h = ymax-ymin;
-    result.points = p;
+    //Find corner left top
+    for (int i=0 ; i<p.size() ; i++) {
+        for (int j=0 ; j<p.size() ; j++ ) {
+            if ( j!=i && abs((p[j].x - p[i].x) - w) )
+        }
+    }
+    sq.real = Rect(pt.x,pt.y,w,h);
+    */
+    //sq.real = cv::minAreaRect(cv::Mat(p));
 
-    //os << "Square en: min(" << result.vertex.x << "," << result.vertex.y << ") width:" << result.w << ", heigh" << result.h << "";
-    //LOGI(os.str().c_str());
+    //Save the points
+    sq.points = p;
 
-    return result;
+    return sq;
 }
 
 /**************************************/
@@ -51,8 +76,9 @@ void findSquares( const Mat& image, std::vector<Square>& squares )
 
     cvtColor( image, gray, CV_BGR2GRAY );
 
+    /*
     string file = "/mnt/sdcard/Pictures/MyCameraApp/blackWhite.jpeg";
-    imwrite(file,gray);
+    imwrite(file,gray);*/
     
     
     // find contours and store them all as a list
@@ -73,7 +99,7 @@ void findSquares( const Mat& image, std::vector<Square>& squares )
         // Note: absolute value of an area is used because
         // area may be positive or negative - in accordance with the
         // contour orientation
-        if( approx.size() == 4 && fabs(contourArea(Mat(approx))) > 10 &&
+        if( approx.size() == 4 && fabs(contourArea(Mat(approx))) > 20 &&
             isContourConvex(Mat(approx)) )
        {
             double maxCosine = 0;
@@ -102,49 +128,41 @@ void findSquares( const Mat& image, std::vector<Square>& squares )
 // the function draws all the squares in the image
 void drawSquares( Mat& image, const std::vector<Square>& squares )
 {
-    
     Point po;
     for( size_t i = 0; i < squares.size(); i++ )
     {
         const Point* p = &squares[i].points[0];
         int n = (int)squares[i].points.size();
         polylines(image, &p, &n, 1, true, Scalar(0,0,255),1,CV_AA);//, 3, CV_AA);
-        //draw vertex up left
-        po.x = squares[i].vertex.x;
-        po.y = squares[i].vertex.y;
+        //draw frame top up left
+        po.x = squares[i].frame.x;
+        po.y = squares[i].frame.y;
         circle(image, po, 3, Scalar(0,255,255),2,CV_AA);
-        /*po.x = squares[i].w + squares[i].vertex.x;
-        po.y = squares[i].h + squares[i].vertex.y;
-        circle(image, po, 5, Scalar(255,0,255),2,CV_AA);*/
     }
 }
 
 /**************************************/
 
-void cutSquares(Mat& image, std::vector<Square>& sq , std::vector<Mat>& subsquares)
+void cutSquares(const Mat& image, const std::vector<Square>& sq , std::vector<Mat>& subsquares)
 {    
     subsquares.clear();
     for ( int i=0 ; i < sq.size() ; i++ ) {
-        //stringstream os;
-        //os << "sub:" << i << " ";
-        //os << sq[i].vertex.x<< " "<< sq[i].vertex.y<< " "<< sq[i].w+sq[i].vertex.x<< " "<<sq[i].h+sq[i].vertex.y;
-        //LOGI(os.str().c_str());
-        Mat subimg(image,cvRect(sq[i].vertex.x, sq[i].vertex.y, sq[i].w, sq[i].h)); //AQUI EL CAMBIO
+        Mat subimg(image,sq[i].frame); //AQUI EL CAMBIO
         subsquares.push_back(subimg);
-        //stringstream os1;
-        //os1 << "_" << i ;
-        //string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
-        //imwrite(file,subimg);
+
+        //Write image
+        std::stringstream os1;
+        os1 << "_" << i ;
+        string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
+        imwrite(file,subimg);
     }
 }
 
 /**************************************/
 
 //check if the squares b is inside the square a
-bool inside (const Square &a , const Square &b ) {
-    return ( (a.vertex.x < b.vertex.x && a.vertex.y < b.vertex.y) &&
-            ((a.vertex.x+a.w) > b.vertex.x && (a.vertex.y+a.h) > b.vertex.y) &&
-            (a.w > b.w && a.h > b.h) );
+inline bool inside (const Square &a , const Square &b ) {
+    return (a.frame & b.frame) == b.frame; //if the intersection between both is b
 }
 
 // the function draws all the squares in the image
@@ -160,18 +178,12 @@ void filterSquares ( std::vector<Square>& squares)
 
     //check wich one's are inside others
     for (int i=0 ; i<n ; i++ ) {
-        if ( check[i] != 1 && squares[i].vertex.x != 1 && squares[i].vertex.y != 1) {
+        if ( check[i] != 1 && squares[i].frame.x != 1 && squares[i].frame.y != 1) {
             for ( int j=0 ; j<n ; j++ ) {
-                /*stringstream os;
-                os << "check " << i << " (" << squares[i].vertex.x << "," << squares[i].vertex.y 
-                   << ") con " << j << " (" << squares[j].vertex.x << "," << squares[j].vertex.y << ")" ;
-                */
                 if (j != i && check[i] != 1 && inside(squares[i],squares[j]) ) {
                     check[j] = 1; //it is inside
                     break;
-                    //os << " dentro";
                 }
-                //LOGI(os.str().c_str());
             }
         }
     }
@@ -183,6 +195,42 @@ void filterSquares ( std::vector<Square>& squares)
 
     //take the solution already filter
     squares = sol;
+
+    delete check;
 }
 
 /**************************************/
+
+void rotateSquares( const Mat& src , const std::vector<Square>& squares, std::vector<Mat>& subsquares) {
+    for ( int i = 0 ; i<squares.size() ; i++ ) 
+    {
+        cv::RotatedRect box = cv::minAreaRect(cv::Mat(squares[i].points));
+        double angle = box.angle;
+        if (angle < -45.)
+            angle += 90.;
+
+        //Rotation
+        cv::Mat rot_mat = cv::getRotationMatrix2D(box.center, angle, 1);
+        cv::Mat rotated;
+        cv::warpAffine(src, rotated, rot_mat, src.size(), cv::INTER_CUBIC); // apply the geometric transformation
+        
+        //Cropped image
+        cv::Size box_size = box.size;
+        if (box.angle < -45.)
+            std::swap(box_size.width, box_size.height);
+        cv::Mat cropped;
+        cv::getRectSubPix(rotated, box_size, box.center, cropped);
+        
+        //log
+        std::stringstream os;
+        os << "Square : " << i << " --->alpha:"<< box.angle;
+        LOGI(os.str().c_str());
+
+        //Write image
+        std::stringstream os1;
+        os1 << i ;
+        string file = "/mnt/sdcard/Pictures/MyCameraApp/squares_rotate_" + os1.str() + ".jpeg";
+        imwrite(file,cropped);
+    }
+    
+}

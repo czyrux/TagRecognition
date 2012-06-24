@@ -130,7 +130,7 @@ Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data,
 		return 0;
 	}
 
-	Image_data* img = loadPixelsFilter(pixels, width, height,true,true,true);
+	Image_data* img = loadPixelsFilter(pixels, width, height,true,false,false);
 	env->ReleaseIntArrayElements(array_data, pixels, 0);
 	if (img->src == NULL) {
 		LOGE("Error loading pixel array.");

@@ -132,30 +132,6 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_OpenCV_releaseSourceIma
 
 /**************************************/
 /*
-JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_OpenCV_extract(
-		JNIEnv* env, jobject thiz) 
-{
- 	Mat img (pImage,true);
- 	Mat grey;
- 	cvtColor(img, grey, CV_BGR2GRAY);
-  	vector<KeyPoint> keypoints;
-
-  	// Detect the keypoints
-  	
-  	//SurfFeatureDetector detector(400.);
-  	//FeatureDetector *detector = new SiftFeatureDetector(400, 500);
-  	//FeatureDetector *detector = new SurfFeatureDetector(400.);
-  	FeatureDetector *detector = new FastFeatureDetector(50);
-  	detector->detect(grey,keypoints);
-  	//Mat outputImage;
-  	Scalar keypointColor = Scalar(0, 0, 255);     // color keypoints.
-  	drawKeypoints(img, keypoints, img, keypointColor, DrawMatchesFlags::DEFAULT);
-  	
-  	//IplImage *dest = &outputImage.operator IplImage();
-  	pImage = cvCloneImage(&img.operator IplImage());
-  	LOGI("extract done\n");
-}
-
 JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_extractFAST(
 		JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
 		jint height) 
@@ -197,12 +173,12 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
     //load the image
     Image_data* data = getIplImageFromIntArray(env, photo_data, width, height);;
     IplImage *image_data = data->red;
-	if (image_data == NULL) {
+    if (image_data == NULL) {
         LOGE("Image data couldn't be loaded.");
 		return 0;
-	}
+    }
     
-    Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
+    /*Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
     string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
     imwrite(file1,img1);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_red.jpeg";
@@ -210,7 +186,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_green.jpeg";
     imwrite(file1,img4);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_blue.jpeg";
-    imwrite(file1,img3);
+    imwrite(file1,img3*/
     
 
     //Convert IplImage to Mat
@@ -234,72 +210,27 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
     os << " later: " << squares.size() ;
     LOGI(os.str().c_str());
 
-    //draw them
-    drawSquares(img, squares);
-
     //cut squares
     vector<Mat> subsquares;
     cutSquares(img,squares,subsquares);
 
-    //cvReleaseImage(&image_data);
+    //rotate squares
+    rotateSquares(img,squares,subsquares);
+
+    //recognize tag's in squares
+
+    //draw them
+    drawSquares(img, squares);
+
     cvReleaseImage(&data->src);
-    cvReleaseImage(&data->green);
-    cvReleaseImage(&data->blue);
+    if (data->green) cvReleaseImage(&data->green);
+    if (data->blue)  cvReleaseImage(&data->blue);
     delete data;
   	
     return getBmpImage(env,&img.operator IplImage());
 }
 
 /**************************************/
-
-//hough transform
-void hough( const Mat& src , int maxLineGap) {
-
-    Mat dst, color_dst;
-
-    /*
-    void Canny(const Mat& image, Mat& edges, double threshold1, double threshold2, int apertureSize=3, bool L2gradient=false)
-        Finds edges in an image using Canny algorithm.
-
-        Parameters: 
-        * image – Single-channel 8-bit input image
-        * edges – The output edge map. It will have the same size and the same type as image
-        * threshold1 – The first threshold for the hysteresis procedure
-        * threshold2 – The second threshold for the hysteresis procedure
-        * apertureSize – Aperture size for the Sobel() operator
-        * L2gradient – Indicates, whether the more accurate norm should be 
-        used to compute the image gradient magnitude ( L2gradient=true ), 
-        or a faster default   norm   is enough ( L2gradient=false )
-    */
-    Canny( src, dst, 50, 200, 3 );
-    cvtColor( dst, color_dst, CV_GRAY2BGR );
-    /*
-    void HoughLinesP(Mat& image, vector<Vec4i>& lines, double rho, double theta, int threshold, double minLineLength=0, double maxLineGap=0)
-        Finds lines segments in a binary image using probabilistic Hough transform.
-        Parameters: 
-        * image – The 8-bit, single-channel, binary source image. The image may be modified by the function
-        * lines – The output vector of lines. Each line is represented by a 4-element vector   , where   and  are the ending points of each line segment detected.
-        * rho – Distance resolution of the accumulator in pixels
-        * theta – Angle resolution of the accumulator in radians
-        * threshold – The accumulator threshold parameter. Only those lines are returned that get enough votes (  )
-        * minLineLength – The minimum line length. Line segments shorter than that will be rejected
-        * maxLineGap – The maximum allowed gap between points on the same line to link them.
-    */
-    vector<Vec4i> lines;
-    HoughLinesP( dst, lines, 1, CV_PI/180, 30/*80*/, 10, maxLineGap );
-    for( size_t i = 0; i < lines.size(); i++ )
-    {
-        line( color_dst, Point(lines[i][0], lines[i][1]),
-            Point(lines[i][2], lines[i][3]), Scalar(0,0,255), 2, 8 );
-    }
-
-    
-    stringstream os;
-    os << maxLineGap;
-    string file = "/mnt/sdcard/Pictures/MyCameraApp/hough" + os.str() + ".jpeg";
-
-    imwrite(file,color_dst);
-}
 
 #ifdef __cplusplus
 }
