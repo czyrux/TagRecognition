@@ -16,6 +16,7 @@ using namespace cv;
 /**************************************/
 
 struct Square {
+    RotatedRect rect;
     Rect frame;
     vector<Point> points;
 };
@@ -23,12 +24,7 @@ struct Square {
 /**************************************/
 
 //
-Square extractSquareData (std::vector<Point> &p);
-
-// helper function:
-// finds a cosine of angle between vectors
-// from pt0->pt1 and from pt0->pt2
-double angle( Point pt1, Point pt2, Point pt0 );
+Square extractSquareData (const std::vector<Point> &p);
 
 // returns sequence of squares detected on the image.
 // the sequence is stored in the specified memory storage
@@ -40,7 +36,7 @@ void drawSquares( Mat& image, const std::vector<Square>& squares);
 //Extract the squares from the images and save the result in subsquares
 void cutSquares( const Mat& image, const std::vector<Square>& squares , std::vector<Mat>& subsquares);
 
-// the function draws all the squares in the image
+//
 void filterSquares ( std::vector<Square>& squares);
 
 //

@@ -2,47 +2,15 @@
 
 /**************************************/
 
-inline float distance ( const Point &a , const Point &b ) {
-    return sqrt((b.x-a.x)^2 + (b.y-a.y)^2);
-}
-
-Square extractSquareData (std::vector<Point> &p) {
-    /*
-    (p0)  1st----2nd  (p1)
-           |      |
-           |      |
-    (p3)  4th----3rd  (p2)
-    */
+Square extractSquareData (const std::vector<Point> &p) 
+{
     Square sq;
 
-    //Calculate the box which involve the square
-    sq.frame = boundingRect(Mat(p));
-
     //Take the real dimensions of square
-    /*
-    Point pt(p[0].x,p[0].y);
-    int w , h ;
-    //Take the real 
-    for (int i=1 ; i<p.size() ; i++) {
-        float d = distance(p[i],pt);
-        //width of square
-        if ( d < w )
-            w = d;
+    sq.rect = cv::minAreaRect(cv::Mat(p));
 
-        //height of square
-        if ( d > h )
-            h = d;
-    }
-
-    //Find corner left top
-    for (int i=0 ; i<p.size() ; i++) {
-        for (int j=0 ; j<p.size() ; j++ ) {
-            if ( j!=i && abs((p[j].x - p[i].x) - w) )
-        }
-    }
-    sq.real = Rect(pt.x,pt.y,w,h);
-    */
-    //sq.real = cv::minAreaRect(cv::Mat(p));
+    //Calculate the box which involve the square
+    sq.frame = cv::boundingRect(cv::Mat(p));//sq.rect.boundingRect();
 
     //Save the points
     sq.points = p;
@@ -115,8 +83,6 @@ void findSquares( const Mat& image, std::vector<Square>& squares )
             // (all angles are ~90 degree) then write quandrange
             // vertices to resultant sequence
             if( maxCosine < 0.3 ) {
-                //squares.push_back(approx);
-                //datasquares.push_back(extractSquareData(approx));
                 squares.push_back(extractSquareData(approx));
             }
          }
@@ -147,7 +113,7 @@ void cutSquares(const Mat& image, const std::vector<Square>& sq , std::vector<Ma
 {    
     subsquares.clear();
     for ( int i=0 ; i < sq.size() ; i++ ) {
-        Mat subimg(image,sq[i].frame); //AQUI EL CAMBIO
+        Mat subimg(image,sq[i].frame);
         subsquares.push_back(subimg);
 
         //Write image
@@ -201,31 +167,36 @@ void filterSquares ( std::vector<Square>& squares)
 
 /**************************************/
 
-void rotateSquares( const Mat& src , const std::vector<Square>& squares, std::vector<Mat>& subsquares) {
+void rotateSquares( const Mat& src , const std::vector<Square>& squares, std::vector<Mat>& subsquares) 
+{
     for ( int i = 0 ; i<squares.size() ; i++ ) 
     {
-        cv::RotatedRect box = cv::minAreaRect(cv::Mat(squares[i].points));
-        double angle = box.angle;
-        if (angle < -45.)
+        // matrices we'll use
+        cv::Mat rotated , rot_mat , cropped;
+
+        // get angle and size from the bounding box
+        double angle = squares[i].rect.angle;
+        cv::Size box_size = squares[i].rect.size;
+
+        //adjust the angle from "http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/"
+        if (angle < -45.) {
             angle += 90.;
+            std::swap(box_size.width, box_size.height);
+        }
 
         //Rotation
-        cv::Mat rot_mat = cv::getRotationMatrix2D(box.center, angle, 1);
-        cv::Mat rotated;
+        rot_mat = cv::getRotationMatrix2D(squares[i].rect.center, angle, 1);
         cv::warpAffine(src, rotated, rot_mat, src.size(), cv::INTER_CUBIC); // apply the geometric transformation
         
         //Cropped image
-        cv::Size box_size = box.size;
-        if (box.angle < -45.)
-            std::swap(box_size.width, box_size.height);
-        cv::Mat cropped;
-        cv::getRectSubPix(rotated, box_size, box.center, cropped);
+        cv::getRectSubPix(rotated, box_size, squares[i].rect.center, cropped);
         
         //log
+        /*
         std::stringstream os;
         os << "Square : " << i << " --->alpha:"<< box.angle;
         LOGI(os.str().c_str());
-
+        */
         //Write image
         std::stringstream os1;
         os1 << i ;
