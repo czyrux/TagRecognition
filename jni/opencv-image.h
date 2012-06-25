@@ -15,8 +15,6 @@
 extern "C" {
 #endif
 
-using namespace cv;
-
 struct bmpfile_header {
   unsigned char magic[2];
   uint32_t filesz;

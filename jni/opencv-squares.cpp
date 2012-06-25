@@ -2,7 +2,7 @@
 
 /**************************************/
 
-Square extractSquareData (const std::vector<Point> &p) 
+Square extractSquareData (const std::vector<cv::Point> &p) 
 {
     Square sq;
 
@@ -23,7 +23,7 @@ Square extractSquareData (const std::vector<Point> &p)
 // helper function:
 // finds a cosine of angle between vectors
 // from pt0->pt1 and from pt0->pt2
-double angle( Point pt1, Point pt2, Point pt0 )
+double angle( cv::Point pt1, cv::Point pt2, cv::Point pt0 )
 {
     double dx1 = pt1.x - pt0.x;
     double dy1 = pt1.y - pt0.y;
@@ -36,30 +36,25 @@ double angle( Point pt1, Point pt2, Point pt0 )
 
 // returns sequence of squares detected on the image.
 // the sequence is stored in the specified memory storage
-void findSquares( const Mat& image, std::vector<Square>& squares )
+void findSquares( const cv::Mat& image, std::vector<Square>& squares )
 {
     squares.clear();
-    Mat gray;
-    vector<vector<Point> > contours;
+    cv::Mat gray;
+    std::vector<std::vector<cv::Point> > contours;
 
-    cvtColor( image, gray, CV_BGR2GRAY );
-
-    /*
-    string file = "/mnt/sdcard/Pictures/MyCameraApp/blackWhite.jpeg";
-    imwrite(file,gray);*/
-    
+    cv::cvtColor( image, gray, CV_BGR2GRAY );
     
     // find contours and store them all as a list
-    findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+    cv::findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-    vector<Point> approx;
+    std::vector<cv::Point> approx;
             
     // test each contour
     for( size_t i = 0; i < contours.size(); i++ )
     {
         // approximate contour with accuracy proportional
         // to the contour perimeter
-        approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
+        cv::approxPolyDP(cv::Mat(contours[i]), approx, arcLength(cv::Mat(contours[i]), true)*0.02, true);
                 
         // square contours should have 4 vertices after approximation
         // relatively large area (to filter out noisy contours)
@@ -67,8 +62,8 @@ void findSquares( const Mat& image, std::vector<Square>& squares )
         // Note: absolute value of an area is used because
         // area may be positive or negative - in accordance with the
         // contour orientation
-        if( approx.size() == 4 && fabs(contourArea(Mat(approx))) > 20 &&
-            isContourConvex(Mat(approx)) )
+        if( approx.size() == 4 && fabs(cv::contourArea(cv::Mat(approx))) > MIN_RECT_SIZE &&
+            cv::isContourConvex(cv::Mat(approx)) )
        {
             double maxCosine = 0;
 
@@ -92,35 +87,69 @@ void findSquares( const Mat& image, std::vector<Square>& squares )
 /**************************************/
 
 // the function draws all the squares in the image
-void drawSquares( Mat& image, const std::vector<Square>& squares )
+void drawSquares( cv::Mat& image, const std::vector<Square>& squares )
 {
-    Point po;
+    cv::Point po;
     for( size_t i = 0; i < squares.size(); i++ )
     {
-        const Point* p = &squares[i].points[0];
+        const cv::Point* p = &squares[i].points[0];
         int n = (int)squares[i].points.size();
-        polylines(image, &p, &n, 1, true, Scalar(0,0,255),1,CV_AA);//, 3, CV_AA);
+        cv::polylines(image, &p, &n, 1, true, cv::Scalar(0,0,255),1,CV_AA);//, 3, CV_AA);
         //draw frame top up left
         po.x = squares[i].frame.x;
         po.y = squares[i].frame.y;
-        circle(image, po, 3, Scalar(0,255,255),2,CV_AA);
+        cv::circle(image, po, 3, cv::Scalar(0,255,255),2,CV_AA);
     }
 }
 
 /**************************************/
 
-void cutSquares(const Mat& image, const std::vector<Square>& sq , std::vector<Mat>& subsquares)
+void cutSquares(const cv::Mat& src, const std::vector<Square>& sq , std::vector<cv::Mat>& subsquares)
 {    
     subsquares.clear();
-    for ( int i=0 ; i < sq.size() ; i++ ) {
-        Mat subimg(image,sq[i].frame);
-        subsquares.push_back(subimg);
+    for ( int i=0 ; i < sq.size() ; i++ ) 
+    {
+         // get angle and size from the bounding box
+        double angle = sq[i].rect.angle;
+        cv::Size box_size = sq[i].rect.size;
+        //adjust the angle from "http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/"
+        if (angle < -45.) {
+            angle += 90.;
+            std::swap(box_size.width, box_size.height);
+        }
 
+        //log
+        std::stringstream os;
+        os << "Square : " << i << " --->alpha:"<< angle;
+
+        //rotation
+        if ( std::abs(angle) > LIMIT_ROTATION ) {
+            // matrices we'll use
+            cv::Mat rotated , rot_mat , cropped;
+
+            //Rotation
+            rot_mat = cv::getRotationMatrix2D(sq[i].rect.center, angle, 1);
+            cv::warpAffine(src, rotated, rot_mat, src.size(), cv::INTER_CUBIC); // apply the geometric transformation
+        
+            //Cropped image
+            cv::getRectSubPix(rotated, box_size, sq[i].rect.center, cropped);
+            subsquares.push_back(cropped);
+            os << "_rotated";
+        }
+        else //just cut it
+        { 
+            cv::Mat subimg(src,sq[i].frame);
+            subsquares.push_back(subimg);
+        }     
+        
+        //log
+        LOGI(os.str().c_str());
+        
         //Write image
         std::stringstream os1;
         os1 << "_" << i ;
-        string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
-        imwrite(file,subimg);
+        std::string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
+        cv::imwrite(file,subsquares[i]);
     }
 }
 
@@ -132,9 +161,9 @@ inline bool inside (const Square &a , const Square &b ) {
 }
 
 // the function draws all the squares in the image
-void filterSquares ( std::vector<Square>& squares)
+void filterSquares ( std::vector<Square>& squares )
 {
-    vector<Square> sol;
+    std::vector<Square> sol;
     sol.clear();
     int n = squares.size();
     int *check = new int[n];
@@ -142,11 +171,11 @@ void filterSquares ( std::vector<Square>& squares)
         check[i] = 0;
     }
 
-    //check wich one's are inside others
+    //check which one's are inside others
     for (int i=0 ; i<n ; i++ ) {
-        if ( check[i] != 1 && squares[i].frame.x != 1 && squares[i].frame.y != 1) {
+        if ( check[i] != 1 ) {
             for ( int j=0 ; j<n ; j++ ) {
-                if (j != i && check[i] != 1 && inside(squares[i],squares[j]) ) {
+                if (j != i && check[j] != 1 && inside(squares[j],squares[i]) ) {
                     check[j] = 1; //it is inside
                     break;
                 }
@@ -154,7 +183,7 @@ void filterSquares ( std::vector<Square>& squares)
         }
     }
 
-    //take the greaters
+    //eliminate the squares which has another inside
     for ( int i=0 ; i<n ; i++ )
         if (check[i] == 0 )
             sol.push_back(squares[i]);
@@ -166,42 +195,3 @@ void filterSquares ( std::vector<Square>& squares)
 }
 
 /**************************************/
-
-void rotateSquares( const Mat& src , const std::vector<Square>& squares, std::vector<Mat>& subsquares) 
-{
-    for ( int i = 0 ; i<squares.size() ; i++ ) 
-    {
-        // matrices we'll use
-        cv::Mat rotated , rot_mat , cropped;
-
-        // get angle and size from the bounding box
-        double angle = squares[i].rect.angle;
-        cv::Size box_size = squares[i].rect.size;
-
-        //adjust the angle from "http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/"
-        if (angle < -45.) {
-            angle += 90.;
-            std::swap(box_size.width, box_size.height);
-        }
-
-        //Rotation
-        rot_mat = cv::getRotationMatrix2D(squares[i].rect.center, angle, 1);
-        cv::warpAffine(src, rotated, rot_mat, src.size(), cv::INTER_CUBIC); // apply the geometric transformation
-        
-        //Cropped image
-        cv::getRectSubPix(rotated, box_size, squares[i].rect.center, cropped);
-        
-        //log
-        /*
-        std::stringstream os;
-        os << "Square : " << i << " --->alpha:"<< box.angle;
-        LOGI(os.str().c_str());
-        */
-        //Write image
-        std::stringstream os1;
-        os1 << i ;
-        string file = "/mnt/sdcard/Pictures/MyCameraApp/squares_rotate_" + os1.str() + ".jpeg";
-        imwrite(file,cropped);
-    }
-    
-}

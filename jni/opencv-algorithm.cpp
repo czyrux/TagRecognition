@@ -15,121 +15,6 @@
 extern "C" {
 #endif
 
-using namespace std;
-using namespace cv;
-
-IplImage* pImage = NULL;
-
-/**************************************/
-
-/*
-JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_OpenCV_extractSURFFeature(
-		JNIEnv* env, jobject thiz)
-{
-	IplImage *pWorkImage=cvCreateImage(cvGetSize(pImage),IPL_DEPTH_8U,1);
-	cvCvtColor(pImage,pWorkImage,CV_BGR2GRAY);
-	CvMemStorage* storage = cvCreateMemStorage(0);
-	CvSeq *imageKeypoints = 0, *imageDescriptors = 0;
-	CvSURFParams params = cvSURFParams(2000, 0);
-	LOGI("after");
-	cvExtractSURF( pWorkImage, 0, &imageKeypoints, &imageDescriptors, storage, params );
-	LOGI("before");
-	// show features
-	for( int i = 0; i < imageKeypoints->total; i++ )
-	{
-		CvSURFPoint* r = (CvSURFPoint*)cvGetSeqElem( imageKeypoints, i );
-		CvPoint center;
-		int radius;
-		center.x = cvRound(r->pt.x);
-		center.y = cvRound(r->pt.y);
-		radius = cvRound(r->size*1.2/9.*2);
-		cvCircle( pImage, center, radius, CV_RGB(255,0,0), 1, CV_AA, 0 );
-	}
-	cvReleaseImage(&pWorkImage);
-	cvRelease((void **)&imageKeypoints);
-	cvReleaseMemStorage(&storage);
-	LOGI("extract done");
-}
-*/
-/**************************************/
-
-/*
-JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_OpenCV_setSourceImage(
-		JNIEnv* env, jobject thiz, jintArray photo_data, jint width,
-		jint height) 
-{
-	if (pImage != NULL) {
-		cvReleaseImage(&pImage);
-		pImage = NULL;
-	}
-	pImage = getIplImageFromIntArray(env, photo_data, width, height);
-	if (pImage == NULL) {
-		return 0;
-	}
-	LOGI("Load Image Done.");
-	return 1;
-}
-
-/**************************************/
-/*
-JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_getSourceImage(
-		JNIEnv* env, jobject thiz)
-{
-	if (pImage == NULL) {
-		LOGE("No source image.");
-		return 0;
-	}
-	cvFlip(pImage);
-	int width = pImage->width;
-	int height = pImage->height;
-	int rowStep = pImage->widthStep;
-	int headerSize = 54;
-	int imageSize = rowStep * height;
-	int fileSize = headerSize + imageSize;
-	unsigned char* image = new unsigned char[fileSize];
-	struct bmpfile_header* fileHeader = (struct bmpfile_header*) (image);
-	fileHeader->magic[0] = 'B';
-	fileHeader->magic[1] = 'M';
-	fileHeader->filesz = fileSize;
-	fileHeader->creator1 = 0;
-	fileHeader->creator2 = 0;
-	fileHeader->bmp_offset = 54;
-	struct bmp_dib_v3_header_t* imageHeader =
-			(struct bmp_dib_v3_header_t*) (image + 14);
-	imageHeader->header_sz = 40;
-	imageHeader->width = width;
-	imageHeader->height = height;
-	imageHeader->nplanes = 1;
-	imageHeader->bitspp = 24;
-	imageHeader->compress_type = 0;
-	imageHeader->bmp_bytesz = imageSize;
-	imageHeader->hres = 0;
-	imageHeader->vres = 0;
-	imageHeader->ncolors = 0;
-	imageHeader->nimpcolors = 0;
-	memcpy(image + 54, pImage->imageData, imageSize);
-	jbooleanArray bytes = env->NewBooleanArray(fileSize);
-	if (bytes == 0) {
-		LOGE("Error in creating the image.");
-		delete[] image;
-		return 0;
-	}
-	env->SetBooleanArrayRegion(bytes, 0, fileSize, (jboolean*) image);
-	delete[] image;
-	return bytes;
-}
-
-/**************************************/
-/*
-JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_OpenCV_releaseSourceImage(
-		JNIEnv* env, jobject thiz ) 
-{
-	if (pImage != NULL) {
-		cvReleaseImage(&pImage);
-		pImage = NULL;
-	}
-}
-
 /**************************************/
 /*
 JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_extractFAST(
@@ -171,57 +56,58 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
 		jint height) 
 {
     //load the image
-    Image_data* data = getIplImageFromIntArray(env, photo_data, width, height);;
-    IplImage *image_data = data->red;
-    if (image_data == NULL) {
+    Image_data* data = getIplImageFromIntArray(env, photo_data, width, height);
+    if (data == NULL) {
         LOGE("Image data couldn't be loaded.");
-		return 0;
+        return 0;
     }
     
-    /*Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
-    string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
-    imwrite(file1,img1);
+    /*cv::Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
+    std::string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
+    cv::imwrite(file1,img1);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_red.jpeg";
-    imwrite(file1,img2);
+    cv::imwrite(file1,img2);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_green.jpeg";
-    imwrite(file1,img4);
+    cv::imwrite(file1,img4);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_blue.jpeg";
-    imwrite(file1,img3*/
+    cv::imwrite(file1,img3*/
     
 
     //Convert IplImage to Mat
- 	Mat img (image_data,false); //NOT COPY OF IMAGE
- 	vector<Square> squares;
-  
+    cv::Mat img (data->red,false); //NOT COPY OF IMAGE
+    cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
+    
     //find squares on image
+    std::vector<Square> squares;
     findSquares(img, squares);
-    stringstream os;
+
+    //log
+    std::stringstream os;
     os << "Square found before: " << squares.size() ;
     
     //draw all squares founded
-    Mat cop = img.clone();
+    cv::Mat cop = img.clone();
     drawSquares(cop, squares);
-    string file = "/mnt/sdcard/Pictures/MyCameraApp/all_squares.jpeg";
-    imwrite(file,cop);
+    std::string file = "/mnt/sdcard/Pictures/MyCameraApp/all_squares.jpeg";
+    cv::imwrite(file,cop);
     
     //remove squares inside others ones
     filterSquares(squares);
 
+    //log
     os << " later: " << squares.size() ;
     LOGI(os.str().c_str());
 
     //cut squares
-    vector<Mat> subsquares;
-    cutSquares(img,squares,subsquares);
-
-    //rotate squares
-    rotateSquares(img,squares,subsquares);
+    std::vector<cv::Mat> subsquares;
+    cutSquares(img_org,squares,subsquares);
 
     //recognize tag's in squares
 
     //draw them
     drawSquares(img, squares);
 
+    //release memory
     cvReleaseImage(&data->src);
     if (data->green) cvReleaseImage(&data->green);
     if (data->blue)  cvReleaseImage(&data->blue);

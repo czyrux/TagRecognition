@@ -87,14 +87,6 @@ Image_data* loadPixelsFilter(int* pixels, int width, int height,
 	image->blue = img_blue;
 	image->green = img_green;
 
-	/* ROTATE IMAGE */
-	/*Mat m (img,true);
-	Point2f src_center(m.cols/2.0F, m.rows/2.0F);
-    Mat rot_mat = getRotationMatrix2D(src_center,-90, 1.0);
-    Mat dst;
-    warpAffine(m, dst, rot_mat, m.size());
-	img = cvCloneImage(&dst.operator IplImage());
-	*/
 	return image;
 }
 
