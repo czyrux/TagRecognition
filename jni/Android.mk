@@ -10,8 +10,8 @@ include local.env.mk
 include $(OPENCV_CONFIG)
 
 # Here we give our module name and source file(s)
-LOCAL_MODULE    := opencv
-LOCAL_SRC_FILES := opencv-image.cpp opencv-squares.cpp opencv-algorithm.cpp
+LOCAL_MODULE    := tagrecognizer-jni
+LOCAL_SRC_FILES := cv-image.cpp cv-squares.cpp cv-tagRecognizer.cpp
 
 LOCAL_LDLIBS +=  -llog -ldl
 
