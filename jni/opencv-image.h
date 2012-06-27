@@ -7,13 +7,16 @@
 #include <cxcore.h>
 #include "log.h"
 
-
 #include <opencv2/highgui/highgui.hpp>
 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define RED_BOUNDARY 0
+#define BLUE_BOUNDARY -10
+#define GREEN_BOUNDARY -40
 
 struct bmpfile_header {
   unsigned char magic[2];
@@ -44,12 +47,18 @@ struct Image_data {
   IplImage* green;
 };
 
+//
 IplImage* loadPixels(int* pixels, int width, int height);
+
+//
 Image_data* loadPixelsFilter(int* pixels, int width, int height , 
   bool red_filter=true , bool green_filter=true , bool blue_filter=true);
 
+//
 Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data,
     jint width, jint height );
+
+//
 jbooleanArray getBmpImage( JNIEnv* env, IplImage* pImage );
 
 #ifdef __cplusplus

@@ -40,7 +40,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		p.setPictureFormat(PixelFormat.JPEG);
 		p.setJpegQuality(100);
 		// best quality
-		int pos = (p.getSupportedPictureSizes().size() - 2);//0;//
+		int pos = (p.getSupportedPictureSizes().size() - 1);//0;//
 		p.setPictureSize(
 				p.getSupportedPictureSizes().get(pos).width,
 				p.getSupportedPictureSizes().get(pos).height);

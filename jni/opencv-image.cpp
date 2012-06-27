@@ -6,34 +6,22 @@ Image_data* loadPixelsFilter(int* pixels, int width, int height,
 								bool red_filter , bool green_filter , bool blue_filter) 
 {
 	int x, y;
-	unsigned char *base = NULL, *base_red = NULL, *base_blue = NULL, *base_green= NULL;
-	unsigned char *ptr = NULL, *ptr_r = NULL, *ptr_b = NULL, *ptr_g = NULL, R , G , B ;
-	int diff;
 	IplImage *img = NULL, *img_red = NULL, *img_green = NULL, *img_blue= NULL;
+	unsigned char *base = NULL;
+	unsigned char *ptr = NULL, R , G , B ;
+	int diff;
 
 	//Create images to store data
+	if(red_filter) 	img_red 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
+	if(green_filter)img_green 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1); 
+	if(blue_filter) img_blue 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
 	img = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
 	base = (unsigned char*) (img->imageData);
-	if (red_filter) {
-		img_red = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
-		base_red = (unsigned char*) (img_red->imageData);
-	} 
-	if (green_filter) {
-		img_green = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
-		base_green = (unsigned char*) (img_green->imageData);
-	} 
-	if (blue_filter) {
-		img_blue = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
-		base_blue = (unsigned char*) (img_blue->imageData);
-	}
-	
+
 	//Get pixels
 	for (y = 0; y < height; y++) 
 	{
 		ptr = base + y * img->widthStep;
-		if (red_filter) ptr_r = base_red + y * img->widthStep;
-		if (green_filter)ptr_g = base_green + y * img->widthStep;
-		if (blue_filter)ptr_b = base_blue + y * img->widthStep;
 		for (x = 0; x < width; x++) 
 		{
 			B = pixels[x + y * width] & 0xFF;
@@ -44,43 +32,37 @@ Image_data* loadPixelsFilter(int* pixels, int width, int height,
 			ptr[3 * x] = B;// blue
 			ptr[3 * x + 1] = G;// green
 			ptr[3 * x + 2] = R;// red
-
+			
 			//to take RED colours, have more Red than Green and Blue together
 			if ( red_filter ) {
 				diff = R - (G+B);
-				if ( diff > 0 ) { //if red colours
-					ptr_r[3 * x] = ptr_r[3 * x + 1] = ptr_r[3 * x + 2] = 0x00; //black
-				}
-				else{ //otherwise
-					ptr_r[3 * x] = ptr_r[3 * x + 1] = ptr_r[3 * x + 2] = 0xFF;//white
-				}
+				((unsigned char *)(img_red->imageData + y*img_red->widthStep))[x] 
+				= (diff > RED_BOUNDARY)? 0x00 : 0xFF ; //black : white
 			}
 			
 			//to take GREEN colours
 			if ( green_filter ) {
 				diff = G - (R+B);
-				if ( diff > -20 ) { 
-					ptr_g[3 * x] = ptr_g[3 * x + 1] = ptr_g[3 * x + 2] = 0x00;//black
-				}
-				else{ //otherwise on white
-					ptr_g[3 * x] = ptr_g[3 * x + 1] = ptr_g[3 * x + 2] = 0xFF;//white
-				}
+				((unsigned char *)(img_green->imageData + y*img_green->widthStep))[x] 
+				= ( diff > GREEN_BOUNDARY )? 0x00 : 0xFF ; //black : white
 			}
 			
 			//to take BLUE colours
 			if ( blue_filter ) {
 				diff = B - (G+R);
-				if ( diff > 0 ) {//blue colours on black
-					ptr_b[3 * x] = ptr_b[3 * x + 1] = ptr_b[3 * x + 2] = 0x00;//black
-				}
-				else{//otherwise on white
-					ptr_b[3 * x] = ptr_b[3 * x + 1] = ptr_b[3 * x + 2] = 0xFF;//white
-				}
+				((unsigned char *)(img_blue->imageData + y*img_blue->widthStep))[x]= 
+				( diff > BLUE_BOUNDARY )? 0x00 : 0xFF ; //black : white
 			}
 		}
 	}
 
-	//assign pointer
+	/* thresholding
+	cvSplit(img, img_blue, img_green, img_red, NULL);
+	cvThreshold(img_blue, img_blue, 150, 255, CV_THRESH_BINARY);
+	cvThreshold(img_green, img_green, 150, 255, CV_THRESH_BINARY);
+	cvThreshold(img_red, img_red, 150, 255, CV_THRESH_BINARY);
+	*/
+	//assign pointer to return
 	Image_data* image = new Image_data;
 	image->src = img;
 	image->red = img_red;
@@ -122,7 +104,7 @@ Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data,
 		return 0;
 	}
 
-	Image_data* img = loadPixelsFilter(pixels, width, height,true,false,false);
+	Image_data* img = loadPixelsFilter(pixels, width, height,true,true,true);
 	env->ReleaseIntArrayElements(array_data, pixels, 0);
 	if (img->src == NULL) {
 		LOGE("Error loading pixel array.");

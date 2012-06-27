@@ -39,10 +39,10 @@ double angle( cv::Point pt1, cv::Point pt2, cv::Point pt0 )
 void findSquares( const cv::Mat& image, std::vector<Square>& squares )
 {
     squares.clear();
-    cv::Mat gray;
+    cv::Mat gray = image.clone();
     std::vector<std::vector<cv::Point> > contours;
 
-    cv::cvtColor( image, gray, CV_BGR2GRAY );
+    //cv::cvtColor( image, gray, CV_BGR2GRAY );
     
     // find contours and store them all as a list
     cv::findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
@@ -94,7 +94,7 @@ void drawSquares( cv::Mat& image, const std::vector<Square>& squares )
     {
         const cv::Point* p = &squares[i].points[0];
         int n = (int)squares[i].points.size();
-        cv::polylines(image, &p, &n, 1, true, cv::Scalar(0,0,255),1,CV_AA);//, 3, CV_AA);
+        cv::polylines(image, &p, &n, 1, true, cv::Scalar(0,255,255),2,CV_AA);
         //draw frame top up left
         po.x = squares[i].frame.x;
         po.y = squares[i].frame.y;
@@ -177,7 +177,7 @@ void filterSquares ( std::vector<Square>& squares )
             for ( int j=0 ; j<n ; j++ ) {
                 if (j != i && check[j] != 1 && inside(squares[j],squares[i]) ) {
                     check[j] = 1; //it is inside
-                    break;
+                    //break;
                 }
             }
         }

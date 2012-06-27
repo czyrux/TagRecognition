@@ -61,16 +61,16 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
         LOGE("Image data couldn't be loaded.");
         return 0;
     }
-    
-    /*cv::Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
+
+    cv::Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
     std::string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
-    cv::imwrite(file1,img1);
+    //cv::imwrite(file1,img1);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_red.jpeg";
     cv::imwrite(file1,img2);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_green.jpeg";
     cv::imwrite(file1,img4);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_blue.jpeg";
-    cv::imwrite(file1,img3*/
+    cv::imwrite(file1,img3);
     
 
     //Convert IplImage to Mat
@@ -86,10 +86,12 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
     os << "Square found before: " << squares.size() ;
     
     //draw all squares founded
+    /*
     cv::Mat cop = img.clone();
     drawSquares(cop, squares);
     std::string file = "/mnt/sdcard/Pictures/MyCameraApp/all_squares.jpeg";
     cv::imwrite(file,cop);
+    */
     
     //remove squares inside others ones
     filterSquares(squares);
@@ -100,20 +102,27 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_square(
 
     //cut squares
     std::vector<cv::Mat> subsquares;
-    cutSquares(img_org,squares,subsquares);
+    cutSquares(img,squares,subsquares);
 
     //recognize tag's in squares
 
     //draw them
-    drawSquares(img, squares);
+    drawSquares(img_org, squares);
+    /*
+    std::string file = "/mnt/sdcard/Pictures/MyCameraApp/src_squares.jpeg";
+    cv::imwrite(file,img_org);
+    */
 
     //release memory
-    cvReleaseImage(&data->src);
-    if (data->green) cvReleaseImage(&data->green);
-    if (data->blue)  cvReleaseImage(&data->blue);
+    //if (data->src)  cvReleaseImage(&data->src);
+    if (data->red)  cvReleaseImage(&data->red);
+    if (data->green)cvReleaseImage(&data->green);
+    if (data->blue) cvReleaseImage(&data->blue);
     delete data;
   	
-    return getBmpImage(env,&img.operator IplImage());
+    //return the image with the squares
+    return getBmpImage(env,&img_org.operator IplImage());
+    //return 0;
 }
 
 /**************************************/
