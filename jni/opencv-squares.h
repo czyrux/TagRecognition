@@ -6,6 +6,7 @@
 #include <cxcore.h>
 #include <opencv2/highgui/highgui.hpp>
 #include "log.h"
+#include "opencv-image.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,8 +35,9 @@ void findSquares( const cv::Mat& image, std::vector<Square>& squares);
 // the function draws all the squares in the image
 void drawSquares( cv::Mat& image, const std::vector<Square>& squares);
 
-//Extract the squares from the images and save the result in subsquares
-void cutSquares( const cv::Mat& image, const std::vector<Square>& squares , std::vector<cv::Mat>& subsquares);
+//Extract the squares from the images and save the result in subsquares.
+//Save three subsquares (R,G,B) per square.
+void cutSquares( const Image_data* src, const std::vector<Square>& squares , std::vector<std::vector<cv::Mat> >& subsquares);
 
 //Remove double squares over the same tag. Take the square more inside
 void filterSquares ( std::vector<Square>& squares);

@@ -98,7 +98,8 @@ obj/local/armeabi/objs/opencv/opencv-squares.o: jni/opencv-squares.cpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui.hpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui_c.h \
  jni/log.h \
- /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h
+ /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h \
+ jni/opencv-image.h
 
 jni/opencv-squares.h:
 
@@ -299,3 +300,5 @@ jni/opencv-squares.h:
 jni/log.h:
 
 /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h:
+
+jni/opencv-image.h:

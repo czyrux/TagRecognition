@@ -43,7 +43,17 @@ void findSquares( const cv::Mat& image, std::vector<Square>& squares )
     std::vector<std::vector<cv::Point> > contours;
 
     //cv::cvtColor( image, gray, CV_BGR2GRAY );
-    
+
+    //erote the image to fill holes
+    int erosion_size = 1;
+    cv::Mat element = getStructuringElement( cv::MORPH_RECT,
+                                       cv::Size( 2*erosion_size + 1, 2*erosion_size+1 ),
+                                       cv::Point( -1, -1 ) );
+    cv::erode(gray, gray, element);
+    //cv::erode(gray, gray, cv::Mat(), cv::Point(-1,-1),1); //standard call
+    /*std::string file = "/mnt/sdcard/Pictures/MyCameraApp/red_erosion.jpeg";
+    cv::imwrite(file,gray);*/
+
     // find contours and store them all as a list
     cv::findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
@@ -67,15 +77,14 @@ void findSquares( const cv::Mat& image, std::vector<Square>& squares )
        {
             double maxCosine = 0;
 
-            for( int j = 2; j < 5; j++ )
-            {
+            for( int j = 2; j < 5; j++ ) {
                 // find the maximum cosine of the angle between joint edges
                 double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
                 maxCosine = MAX(maxCosine, cosine);
             }
 
             // if cosines of all angles are small
-            // (all angles are ~90 degree) then write quandrange
+            // (all angles are ~90 degree) then store quandrange
             // vertices to resultant sequence
             if( maxCosine < 0.3 ) {
                 squares.push_back(extractSquareData(approx));
@@ -104,12 +113,22 @@ void drawSquares( cv::Mat& image, const std::vector<Square>& squares )
 
 /**************************************/
 
-void cutSquares(const cv::Mat& src, const std::vector<Square>& sq , std::vector<cv::Mat>& subsquares)
+void cutSquares(const Image_data* src, const std::vector<Square>& sq , 
+                std::vector<std::vector<cv::Mat> >& subsquares)
 {    
+    //Matrix's to extract the subsquares
+    cv::Mat red (src->red,false) , green (src->green,false) , blue (src->blue,false);
     subsquares.clear();
     for ( int i=0 ; i < sq.size() ; i++ ) 
     {
-         // get angle and size from the bounding box
+        //Submatrix to fill
+        cv::Mat subimg_red, subimg_green , subimg_blue;
+
+        //auxiliar vector to store the array of Mat
+        std::vector<cv::Mat> aux;
+        aux.clear();
+
+        // get angle and size from the bounding box
         double angle = sq[i].rect.angle;
         cv::Size box_size = sq[i].rect.size;
         //adjust the angle from "http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/"
@@ -125,31 +144,44 @@ void cutSquares(const cv::Mat& src, const std::vector<Square>& sq , std::vector<
         //rotation
         if ( std::abs(angle) > LIMIT_ROTATION ) {
             // matrices we'll use
-            cv::Mat rotated , rot_mat , cropped;
+            cv::Mat rotatedR , rotatedG , rotatedB , rot_mat;
 
-            //Rotation
+            //Rotation. Same rotation for all
             rot_mat = cv::getRotationMatrix2D(sq[i].rect.center, angle, 1);
-            cv::warpAffine(src, rotated, rot_mat, src.size(), cv::INTER_CUBIC); // apply the geometric transformation
-        
+            cv::warpAffine(red, rotatedR, rot_mat, red.size(), cv::INTER_CUBIC); // apply the geometric transformation
+            cv::warpAffine(green, rotatedG, rot_mat, green.size(), cv::INTER_CUBIC);
+            cv::warpAffine(blue, rotatedB, rot_mat, blue.size(), cv::INTER_CUBIC);
+
             //Cropped image
-            cv::getRectSubPix(rotated, box_size, sq[i].rect.center, cropped);
-            subsquares.push_back(cropped);
+            cv::getRectSubPix(rotatedR, box_size, sq[i].rect.center, subimg_red);
+            cv::getRectSubPix(rotatedG, box_size, sq[i].rect.center, subimg_green);
+            cv::getRectSubPix(rotatedB, box_size, sq[i].rect.center, subimg_blue);
+            
             os << "_rotated";
         }
-        else //just cut it
-        { 
-            cv::Mat subimg(src,sq[i].frame);
-            subsquares.push_back(subimg);
+        else {//just cut it
+            subimg_red   = red(sq[i].frame);
+            subimg_green = green(sq[i].frame); 
+            subimg_blue  = blue(sq[i].frame);
         }     
+        
+        //add subimages
+        aux.push_back(subimg_red);//R
+        aux.push_back(subimg_green);//G
+        aux.push_back(subimg_blue);//B
+        subsquares.push_back(aux);
         
         //log
         LOGI(os.str().c_str());
         
         //Write image
-        std::stringstream os1;
+        /*std::stringstream os1;
         os1 << "_" << i ;
-        std::string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
-        cv::imwrite(file,subsquares[i]);
+        for ( int j=0 ; j<3 ;j++) {
+            os1 << "_" << j ;
+            std::string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
+            cv::imwrite(file,subsquares[i][j]);
+        }*/        
     }
 }
 

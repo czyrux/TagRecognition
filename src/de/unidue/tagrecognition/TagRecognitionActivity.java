@@ -92,32 +92,9 @@ public class TagRecognitionActivity extends Activity {
 			
 
 			// Filter image
-			//208 ms
-			//Bitmap bmpFilter = opencv.opencvFilter(bmpRotate);
+			//208 ms jni
+			//1700 ms java
 			
-			
-			//1700 ms
-			/*
-			start = System.currentTimeMillis();
-			Bitmap bmpFilter2 = ColorFilter.extractRed(bmpRotate, 0);
-			end = System.currentTimeMillis();
-			elapse = end - start;
-			Toast.makeText(TagRecognitionActivity.this, "" + elapse + " ms is used to extract features.",
-					Toast.LENGTH_LONG).show();
-			*/
-			
-			/**
-			 * JNI ALGORITHM1 WORKING SLOW 320 ms
-			 */
-			
-			/*
-			start = System.currentTimeMillis();
-			Bitmap bmpExtract1 = opencv.opencvImage(bmpFilter);
-			end = System.currentTimeMillis();
-			elapse = end - start;
-			Toast.makeText(TagRecognitionActivity.this, "" + elapse + " ms is used to extract features.",
-					Toast.LENGTH_LONG).show();
-			*/
 			/**
 			 * JNI ALGORITHM2 WORKING (complete program)
 			 * FAST 840 ms
