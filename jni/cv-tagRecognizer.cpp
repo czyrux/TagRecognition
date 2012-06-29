@@ -9,6 +9,7 @@
 
 #include "cv-image.h"
 #include "cv-squares.h"
+#include "cv-tag.h"
 #include "cv-log.h"
 
 #ifdef __cplusplus
@@ -64,7 +65,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
 
     /*cv::Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
     std::string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
-    cv::imwrite(file1,img1);
+    //cv::imwrite(file1,img1);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_red.jpeg";
     cv::imwrite(file1,img2);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_green.jpeg";
@@ -105,6 +106,11 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
     cutSquares(data,squares,subsquares);
 
     //recognize tag's in squares
+    for (int i=0 ; i < subsquares.size() ; i++ )
+        if ( subsquares[i][0].rows < subsquares[i][0].cols) {
+            decodeTag(subsquares[i]);
+            break;
+        }
 
     //draw them
     drawSquares(img_org, squares);

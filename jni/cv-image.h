@@ -7,15 +7,12 @@
 #include <cxcore.h>
 #include "cv-log.h"
 
-#include <opencv2/highgui/highgui.hpp>
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define RED_BOUNDARY 0
-#define BLUE_BOUNDARY -10
+#define BLUE_BOUNDARY -20
 #define GREEN_BOUNDARY -40
 
 struct bmpfile_header {

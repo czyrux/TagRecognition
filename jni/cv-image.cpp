@@ -5,10 +5,8 @@
 Image_data* loadPixelsFilter(int* pixels, int width, int height,
 								bool red_filter , bool green_filter , bool blue_filter) 
 {
-	int x, y;
 	IplImage *img = NULL, *img_red = NULL, *img_green = NULL, *img_blue= NULL;
-	unsigned char *base = NULL;
-	unsigned char *ptr = NULL, R , G , B ;
+	uchar *base = NULL , *ptr = NULL, R , G , B ;
 	int diff;
 
 	//Create images to store data
@@ -16,13 +14,13 @@ Image_data* loadPixelsFilter(int* pixels, int width, int height,
 	if(green_filter)img_green 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1); 
 	if(blue_filter) img_blue 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
 	img = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
-	base = (unsigned char*) (img->imageData);
+	base = (uchar*) (img->imageData);
 
 	//Get pixels
-	for (y = 0; y < height; y++) 
+	for (int y = 0; y < height; y++) 
 	{
 		ptr = base + y * img->widthStep;
-		for (x = 0; x < width; x++) 
+		for (int x = 0; x < width; x++) 
 		{
 			B = pixels[x + y * width] & 0xFF;
 			G = pixels[x + y * width] >> 8 & 0xFF;
@@ -36,21 +34,21 @@ Image_data* loadPixelsFilter(int* pixels, int width, int height,
 			//to take RED colours, have more Red than Green and Blue together
 			if ( red_filter ) {
 				diff = R - (G+B);
-				((unsigned char *)(img_red->imageData + y*img_red->widthStep))[x] 
+				((uchar *)(img_red->imageData + y*img_red->widthStep))[x] 
 				= (diff > RED_BOUNDARY)? 0x00 : 0xFF ; //black : white
 			}
 			
 			//to take GREEN colours
 			if ( green_filter ) {
 				diff = G - (R+B);
-				((unsigned char *)(img_green->imageData + y*img_green->widthStep))[x] 
+				((uchar *)(img_green->imageData + y*img_green->widthStep))[x] 
 				= ( diff > GREEN_BOUNDARY )? 0x00 : 0xFF ; //black : white
 			}
 			
 			//to take BLUE colours
 			if ( blue_filter ) {
 				diff = B - (G+R);
-				((unsigned char *)(img_blue->imageData + y*img_blue->widthStep))[x]= 
+				((uchar *)(img_blue->imageData + y*img_blue->widthStep))[x]= 
 				( diff > BLUE_BOUNDARY )? 0x00 : 0xFF ; //black : white
 			}
 		}
