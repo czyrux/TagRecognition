@@ -4,24 +4,35 @@
 
 std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& subsquares ) 
 {
+    std::vector<std::string> solution;
+    solution.clear();
+    for ( int i=0 ; i<subsquares.size() ; i++ ) {
+        std::stringstream os;
+        solution.push_back(decodeTag(subsquares[i]));
+        os << i << ": " << solution[i];
+        LOGI(os.str().c_str());
+    }
+
+    return solution;
 }
 
 /**************************************/
 
 //HACERLA PARA UN CUADRADO ALREDEDOR DEL PUNTO
-bool checkPoint ( const cv::Mat& image , int y , int x ) {
-	if ( image.at<uchar>(y, x) == 0x00 ||
-		image.at<uchar>(y-1, x) == 0x00 || image.at<uchar>(y+1, x) == 0x00 || 
-		image.at<uchar>(y, x-1) == 0x00 || image.at<uchar>(y, x-1) == 0x00
-		)
-		return true;
-	else
-		return false;
+bool checkPoint ( const cv::Mat& image , int y , int x , uchar colour ) {
+    for ( int i=-2 ; i<2 ; i++ )
+        for ( int j=-2 ; j<2 ; j++ )
+            if ( image.at<uchar>(y+i, x+j) == colour )
+                return true;
+        
+    return false;
 }
 
-std::string decodeTag ( std::vector<cv::Mat>& subsquares ) {
+/**************************************/
+
+std::string decodeTag (const std::vector<cv::Mat>& subsquares ) {
 	std::string tag;
-	LOGI("decodeTag");
+	LOGI("decoding...");
 	if ( subsquares.size() != 3) {
     	return 0;
     }
@@ -29,44 +40,39 @@ std::string decodeTag ( std::vector<cv::Mat>& subsquares ) {
 	cv::Mat rImage = subsquares[0] , gImage = subsquares[1] , bImage = subsquares[2] ;
 	
 	//CONSTANT FOR TAGS
-	int COLS = 4 , ROWS = 3;
+	int cols = COLS , rows = ROWS;
+
+    if (rImage.rows > rImage.cols) { //vertical tag
+        std::swap(cols,rows);
+    }
 
 	//Value of increment for the index
-	int incWidth = rImage.cols/COLS+1 , incHeight = rImage.rows/ROWS ;
-
-	if (rImage.rows > rImage.cols) {
-		LOGE(" ABORT more rows than cols");
-    	return 0;
-    }
+	int incWidth = rImage.cols/cols+1 , incHeight = rImage.rows/rows ;
 
     //y height-rows , x width-cols
     //Check the tag
-    uchar value;
     std::vector<std::vector<int> > v;
-    v.resize(ROWS);
+    v.resize(rows);
 	for( int i = 0, y = incHeight/2; y < rImage.rows; y += incHeight , i++ )
 	{
-		v[i].resize(COLS);
-		LOGI("resize");
-    	for( int j= 0 , x = incWidth/2; x < rImage.cols; x += incWidth , j++ )
+		v[i].resize(cols);
+    	for( int j = 0 , x = incWidth/2; x < rImage.cols; x += incWidth , j++ )
     	{
-
-        	
         	//check for red circle
-        	if (/*rImage.at<uchar>(y, x) == 0x00*/ checkPoint(rImage,y,x) ) {
-        		v[i][j] = 1;
+        	if ( checkPoint(rImage,y,x,0x00) ) {
+        		v[i][j] = RED_VALUE;
         	}
         	//if there is not red, check for blue
-        	else if (/*bImage.at<uchar>(y, x) == 0x00*/ checkPoint(bImage,y,x)) {
-        		v[i][j] = 2;
+        	else if ( checkPoint(bImage,y,x,0x00)) {
+        		v[i][j] = BLUE_VALUE;
         	}
         	//if neither blue, check for green. More voluble to detect other like him
-        	else if (/*gImage.at<uchar>(y, x) == 0x00*/ checkPoint(gImage,y,x)) {
-        		v[i][j] = 3;
+        	else if ( checkPoint(gImage,y,x,0x00)) {
+        		v[i][j] = GREEN_VALUE;
         	}
         	//not colour detected
         	else
-        		v[i][j] = 0;
+        		v[i][j] = DEFAULT_VALUE;
 
         	//cv::Point p(x,y); //(x,y)
         	//cv::circle(rImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
@@ -76,6 +82,7 @@ std::string decodeTag ( std::vector<cv::Mat>& subsquares ) {
 	}
 
 	//Print matrix
+    /*
 	for ( int i=0 ; i<v.size() ; i++ ) {
 		std::stringstream os;
 		for (int j=0 ; j<v[0].size() ; j++ ) {
@@ -83,75 +90,65 @@ std::string decodeTag ( std::vector<cv::Mat>& subsquares ) {
 		}
 		LOGI(os.str().c_str());
 	}
+    */
 	
+    //Oriented tag
+    orientedTag(v);
+
+    //Create string for tag
+    std::stringstream os;
+    for ( int i=0 ; i<v.size() ; i++ )
+        for (int j=0 ; j<v[0].size() ; j++ ) {
+            os << v[i][j];
+        }
+    tag = os.str();
+
+    /*
 	std::string file = "/mnt/sdcard/Pictures/MyCameraApp/pointsR.jpeg";
     cv::imwrite(file,rImage);
     file = "/mnt/sdcard/Pictures/MyCameraApp/pointsG.jpeg";
     cv::imwrite(file,gImage);
     file = "/mnt/sdcard/Pictures/MyCameraApp/pointsB.jpeg";
     cv::imwrite(file,bImage); 
+    */
     
-
+    LOGI("decode done");
 	return tag;
-} 
-/*
-int indx=0;
- const double start = 1/((double)_length*2), step = 2/((double)_length*2);
- 
- for (int i=0; i < _size; i++)
-  _tag[i] = W;
- 
- LOGI("decoding");
- 
- 
- for (double i = start; i < 1.0; i+=step) {
-    
-  for (double j = start; j < 1.0; j += step, indx++ ) {
-     
-   for (int l = -2; l < 2 && rImage.rows * i + l < rImage.rows * (i  + start) ; l++){
-      
-    if(rImage.rows * i + l > rImage.rows * (i == start? 0 :  i - start)){
-     
-     for (int k = -2; k < 2 && 3 * ((int)rImage.cols*j + k) < 3 * ((int)rImage.cols * ((j < 1.0)? j + start : j ))  ; k++) {
-      
-      if(3 * ((int)gImage.cols *j + k) < 3 * ((int)gImage.cols * ( j - start)))
-       continue;
-      
-       unsigned char* ptrR = rImage.ptr<unsigned char>((int)(rImage.rows * i) + l);
-       unsigned char* ptrG = gImage.ptr<unsigned char>((int)(gImage.rows * i) + l);
-       unsigned char* ptrB = bImage.ptr<unsigned char>((int)(bImage.rows * i) + l);
-  
-      
-      if(ptrR[3 * (int)(rImage.cols * j + k) + 2] < 50 ){//Red
-       _tag[indx]= R;
-       //ptrR[3 * (int)(rImage.cols * j + k) + 2] = 0xFF;
-       
-      }
-      if(ptrG[3 * (int)(gImage.cols * j + k)] < 50 ){ //Green
-       _tag[indx] = G;
-       //ptrG[3 * (int)(rImage.cols * j + k) ] = 0xFF;
-      }
-      if(ptrB[3 * (int)(bImage.cols * j + k) + 1] < 50 ){ //Blue
-       _tag[indx] = B;
-       //ptrB[3 * (int)(rImage.cols * j + k) + 1] = 0xFF;
-      }
-     
-     }
-    }
-   }
-  
-  }
- }
- //LOGI("...out decodedImageToVector");
 }
-*/
 
 /**************************************/
 
-/**************************************/
+void orientedTag ( std::vector<std::vector<int> > &v ) {
+    //check if we need to turn the matrix (rows>cols)
+    std::vector<std::vector<int> > aux;
+    int w ;
+    if ( v.size() > v[0].size() ) {
+        aux.resize(ROWS, std::vector<int>(COLS));
+        w = v[0].size();
+        for ( int i=0 ; i<v.size() ; i++ ) {
+            for ( int j=0 , k=w-1; j<w; j++ , k--) {
+                aux[k][i] = v[i][j];
+            }
+        }
+        v.clear();
+        v = aux;
+    }
+    
+    //check if it's good oriented
+    bool oriented = true;
+    for (int i=0 ; i<v.size() ; i++ )
+        if ( v[i][0] != RED_VALUE ) {
+            oriented = false;
+            break;
+        }
 
-/**************************************/
-
-/**************************************/
+    //if not, oriented
+    if (!oriented) {
+        for ( int i=0 , k = (v.size()-1) ; i<(v.size()/2)+1 ; i++ , k-- )
+            for ( int j=0 , l = v[0].size()-1; j<(v[0].size()) && !(j >= l && i==k) ; j++ , l-- ) {
+                std::swap(v[i][j],v[k][l]);
+            }
+    }
+} 
 
 /**************************************/

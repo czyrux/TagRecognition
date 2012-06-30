@@ -63,7 +63,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
         return 0;
     }
 
-    /*cv::Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
+    cv::Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
     std::string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
     //cv::imwrite(file1,img1);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_red.jpeg";
@@ -71,7 +71,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_green.jpeg";
     cv::imwrite(file1,img4);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_blue.jpeg";
-    cv::imwrite(file1,img3);*/
+    cv::imwrite(file1,img3);
     
 
     //Convert IplImage to Mat
@@ -86,14 +86,6 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
     std::stringstream os;
     os << "Square found before: " << squares.size() ;
     
-    //draw all squares founded
-    /*
-    cv::Mat cop = img.clone();
-    drawSquares(cop, squares);
-    std::string file = "/mnt/sdcard/Pictures/MyCameraApp/all_squares.jpeg";
-    cv::imwrite(file,cop);
-    */
-    
     //remove squares inside others ones
     filterSquares(squares);
 
@@ -106,11 +98,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
     cutSquares(data,squares,subsquares);
 
     //recognize tag's in squares
-    for (int i=0 ; i < subsquares.size() ; i++ )
-        if ( subsquares[i][0].rows < subsquares[i][0].cols) {
-            decodeTag(subsquares[i]);
-            break;
-        }
+    decodeTags(subsquares);
 
     //draw them
     drawSquares(img_org, squares);

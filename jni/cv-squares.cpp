@@ -52,7 +52,7 @@ void findSquares( const cv::Mat& image, std::vector<Square>& squares )
                                        cv::Point( -1, -1 ) );
     cv::erode(gray, gray, element);
     */
-    //cv::erode(gray, gray, cv::Mat(), cv::Point(-1,-1),1); //standard call
+    cv::erode(gray, gray, cv::Mat(), cv::Point(-1,-1),1); //standard call
     /*std::string file = "/mnt/sdcard/Pictures/MyCameraApp/red_erosion.jpeg";
     cv::imwrite(file,gray);*/
 
