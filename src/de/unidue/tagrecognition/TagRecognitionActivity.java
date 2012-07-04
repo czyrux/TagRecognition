@@ -21,19 +21,24 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Environment;
 import android.util.Log;
+import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class TagRecognitionActivity extends Activity {
 	private static final String TAG = "CVJNI_Activity";
 	public static final int MEDIA_TYPE_IMAGE = 1;
 
-	private Preview mPreview;
+	private Preview _mPreview;
 	// private Camera mCamera;
-	private Timer timer ;
-	private OpenCV opencv = new OpenCV();
+	private Timer _timer ;
+	private OpenCV _opencv = new OpenCV();
+	private Button _recognize;
+	private Button _calibrate;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -45,21 +50,44 @@ public class TagRecognitionActivity extends Activity {
 
 		setContentView(R.layout.main);
 
-		mPreview = new Preview(this); // <3>
-		((FrameLayout) findViewById(R.id.preview)).addView(mPreview); // <4>
-
-		timer = new Timer();
-		timer.schedule(new UpdateTimeTask(), 1000, 2000);
+		_mPreview = new Preview(this);
+		((FrameLayout) findViewById(R.id.preview)).addView(_mPreview);
+		
+		RelativeLayout relativeLayoutControls = (RelativeLayout) findViewById(R.id.controls_layout);
+        relativeLayoutControls.bringToFront();
+        
+        _recognize = (Button) findViewById(R.id.recognize_action);
+        _calibrate = (Button) findViewById(R.id.calibrate_action);
+        
+        //action for recognize button
+        _recognize.setOnClickListener( new View.OnClickListener() {
+        		@Override
+        		public void onClick(View v) {
+        			_timer = new Timer();
+        			_timer.schedule(new UpdateTimeTask(), 1000, 2000);
+        		}
+    		}
+    	);
+        _recognize.setEnabled(false);
+        
+        //actions for calibrate button
+        _calibrate.setOnClickListener( new View.OnClickListener() {
+    			@Override
+    			public void onClick(View v) {
+    				_recognize.setEnabled(true);
+    			}
+			}
+        );
 
 	}
 
 	int i = 0;
-
+	//for the temporal calling to task
 	class UpdateTimeTask extends TimerTask {//
 		public void run() {
 			if (i < 1) {
 				Log.d(TAG, "foto " + i);
-				mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
+				_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
 					public void onAutoFocus(boolean success, Camera camera) {
 							camera.takePicture(null, null, jpegCallback);
 					}
@@ -101,7 +129,7 @@ public class TagRecognitionActivity extends Activity {
 			 * SURF 4000ms
 			 */
 			
-			Bitmap bmpExtract2 = opencv.openCV(bmpRotate);
+			Bitmap bmpExtract2 = _opencv.openCV(bmpRotate);
 			end = System.currentTimeMillis();
 			elapse = end - start;
 			Toast.makeText(TagRecognitionActivity.this, "" + elapse + " ms is used to extract features.",
@@ -117,7 +145,7 @@ public class TagRecognitionActivity extends Activity {
 			if (bmpExtract2!=null)storeBitmap(bmpExtract2, "IMG_1_");
 
 			// Continue with the preview
-			mPreview.mCamera.startPreview();
+			_mPreview.mCamera.startPreview();
 		}
 	};
 
@@ -194,20 +222,15 @@ public class TagRecognitionActivity extends Activity {
 
 	@Override
 	protected void onPause() {
-		// TODO Auto-generated method stub
 		super.onPause();
+		_mPreview.release();
 	}
 
-	@Override
-	protected void onResume() {
-		// TODO Auto-generated method stub
-		super.onResume();
-	}
-
+	//Delete timer
 	private void cleanTimer() {
-		if (timer != null) {
-			this.timer.cancel();
-			timer = null;
+		if (_timer != null) {
+			_timer.cancel();
+			_timer = null;
 		}
 	}
 

@@ -26,6 +26,8 @@ public class OpenCV {
 		//call method jni
 		//byte[] imageData = this.extractFAST(pixels, width, height);
 		byte[] imageData = this.tagRecognizer(pixels, width, height);
+		
+		//prepare the data returned
 		Bitmap bmp = null;
 		if (imageData != null )
 			bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);

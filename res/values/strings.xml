@@ -3,5 +3,7 @@
 
     <string name="hello">Hello World, TagRecognitionActivity!</string>
     <string name="app_name">TagRecognition</string>
+    <string name="recognize_label">Recognize tags</string>
+    <string name="calibrate_label">Calibrate</string>
 
 </resources>
