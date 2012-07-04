@@ -52,9 +52,13 @@ void findSquares( const cv::Mat& image, std::vector<Square>& squares )
                                        cv::Point( -1, -1 ) );
     cv::erode(gray, gray, element);
     */
+    /*
     cv::erode(gray, gray, cv::Mat(), cv::Point(-1,-1),1); //standard call
-    /*std::string file = "/mnt/sdcard/Pictures/MyCameraApp/red_erosion.jpeg";
-    cv::imwrite(file,gray);*/
+    //cv::dilate(gray, gray, cv::Mat(), cv::Point(-1,-1),2); //standard call
+    std::string file = "/mnt/sdcard/Pictures/MyCameraApp/red_trans.jpeg";
+    cv::imwrite(file,gray);
+    */
+    
 
     // find contours and store them all as a list
     cv::findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
@@ -115,16 +119,28 @@ void drawSquares( cv::Mat& image, const std::vector<Square>& squares )
 
 /**************************************/
 
+void removeBorder ( cv::Mat & img ) {
+    int w = img.cols * WIDTH_BORDER , h = img.rows * HEIGHT_BORDER;
+    img = img( cv::Rect(w, h, (img.cols-w*2) , (img.rows-h*2)) );
+}
+
+//INCLUYE CORTE DENTRO DE LA BUENA
 void cutSquares(const Image_data* src, const std::vector<Square>& sq , 
                 std::vector<std::vector<cv::Mat> >& subsquares)
 {    
     //Matrix's to extract the subsquares
-    cv::Mat red (src->red,false) , green (src->green,false) , blue (src->blue,false);
+    cv::Mat rImage (src->rImage,false) , gImage (src->gImage,false) , bImage (src->bImage,false)
+            , img (src->src,false);
+
+    //erode images
+    cv::erode(gImage, gImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
+    cv::erode(bImage, bImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
+
     subsquares.clear();
     for ( int i=0 ; i < sq.size() ; i++ ) 
     {
         //Submatrix to fill
-        cv::Mat subimg_red, subimg_green , subimg_blue;
+        cv::Mat subimg_red, subimg_green , subimg_blue , subimg;
 
         //auxiliar vector to store the array of Mat
         std::vector<cv::Mat> aux;
@@ -146,31 +162,42 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
         //rotation
         if ( std::abs(angle) > LIMIT_ROTATION ) {
             // matrices we'll use
-            cv::Mat rotatedR , rotatedG , rotatedB , rot_mat;
+            cv::Mat rotatedR , rotatedG , rotatedB , rot_mat , rotated;
 
             //Rotation. Same rotation for all
             rot_mat = cv::getRotationMatrix2D(sq[i].rect.center, angle, 1);
-            cv::warpAffine(red, rotatedR, rot_mat, red.size(), cv::INTER_CUBIC); // apply the geometric transformation
-            cv::warpAffine(green, rotatedG, rot_mat, green.size(), cv::INTER_CUBIC);
-            cv::warpAffine(blue, rotatedB, rot_mat, blue.size(), cv::INTER_CUBIC);
+            cv::warpAffine(rImage, rotatedR, rot_mat, rImage.size(), cv::INTER_CUBIC); // apply the geometric transformation
+            cv::warpAffine(gImage, rotatedG, rot_mat, gImage.size(), cv::INTER_CUBIC);
+            cv::warpAffine(bImage, rotatedB, rot_mat, bImage.size(), cv::INTER_CUBIC);
+            cv::warpAffine(img, rotated, rot_mat, img.size(), cv::INTER_CUBIC);
 
             //Cropped image
             cv::getRectSubPix(rotatedR, box_size, sq[i].rect.center, subimg_red);
             cv::getRectSubPix(rotatedG, box_size, sq[i].rect.center, subimg_green);
             cv::getRectSubPix(rotatedB, box_size, sq[i].rect.center, subimg_blue);
+            cv::getRectSubPix(rotated, box_size, sq[i].rect.center, subimg);
             
             os << "_rotated";
         }
         else {//just cut it
-            subimg_red   = red(sq[i].frame);
-            subimg_green = green(sq[i].frame); 
-            subimg_blue  = blue(sq[i].frame);
+            subimg_red   = rImage(sq[i].frame);
+            subimg_green = gImage(sq[i].frame); 
+            subimg_blue  = bImage(sq[i].frame);
+            subimg = img(sq[i].frame);
         }     
         
+        //remove border of tag
+        removeBorder(subimg_red);
+        removeBorder(subimg_green);
+        removeBorder(subimg_blue);
+        removeBorder(subimg);
+
         //add subimages
         aux.push_back(subimg_red);//R
         aux.push_back(subimg_green);//G
         aux.push_back(subimg_blue);//B
+        aux.push_back(subimg);//SRC
+
         subsquares.push_back(aux);
         
         //log
@@ -192,6 +219,8 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
 //check if the squares b is inside the square a
 inline bool inside (const Square &a , const Square &b ) {
     return (a.frame & b.frame) == b.frame; //if the intersection between both is b
+    /*cv::Point p1 (b.frame.x,b.frame.y) , p2 (b.frame.x+b.frame.width,b.frame.y+b.frame.height);
+    return a.frame.contains(p1) && a.frame.contains(p2);*/
 }
 
 // the function draws all the squares in the image
@@ -207,11 +236,11 @@ void filterSquares ( std::vector<Square>& squares )
 
     //check which one's are inside others
     for (int i=0 ; i<n ; i++ ) {
-        if ( check[i] != 1 ) {
+        if ( check[i] != 1 && squares[i].frame.x != 1 && squares[i].frame.y != 1) {
             for ( int j=0 ; j<n ; j++ ) {
-                if (j != i && check[j] != 1 && inside(squares[j],squares[i]) ) {
+                if (j != i && check[j] != 1 && inside(squares[i],squares[j]) ) {
                     check[j] = 1; //it is inside
-                    //break;
+                    break;
                 }
             }
         }
@@ -219,7 +248,7 @@ void filterSquares ( std::vector<Square>& squares )
 
     //eliminate the squares which has another inside
     for ( int i=0 ; i<n ; i++ )
-        if (check[i] == 0 )
+        if (check[i] == 0 && squares[i].frame.x != 1 && squares[i].frame.y != 1 )
             sol.push_back(squares[i]);
 
     //take the solution already filter

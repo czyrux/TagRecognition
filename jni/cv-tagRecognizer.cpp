@@ -63,7 +63,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
         return 0;
     }
 
-    cv::Mat img1 (data->src,false) , img2 (data->red,false) , img3 (data->blue,false) , img4 (data->green,false); //NOT COPY OF IMAGE
+    cv::Mat img1 (data->src,false) , img2 (data->rImage,false) , img3 (data->bImage,false) , img4 (data->gImage,false); //NOT COPY OF IMAGE
     std::string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
     //cv::imwrite(file1,img1);
     file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_red.jpeg";
@@ -75,7 +75,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
     
 
     //Convert IplImage to Mat
-    cv::Mat img (data->red,false); //NOT COPY OF IMAGE
+    cv::Mat img (data->rImage,false); //NOT COPY OF IMAGE
     cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
     
     //find squares on image
@@ -108,9 +108,9 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecogniz
 
     //release memory
     if (data->src)  cvReleaseImage(&data->src);
-    if (data->red)  cvReleaseImage(&data->red);
-    if (data->green)cvReleaseImage(&data->green);
-    if (data->blue) cvReleaseImage(&data->blue);
+    if (data->rImage)  cvReleaseImage(&data->rImage);
+    if (data->gImage)cvReleaseImage(&data->gImage);
+    if (data->bImage) cvReleaseImage(&data->bImage);
     delete data;
   	
     //return the image with the squares

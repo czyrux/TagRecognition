@@ -21,7 +21,7 @@ extern "C" {
 
 std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& subsquares ) ;
 
-std::string decodeTag (const std::vector<cv::Mat>& subsquares ) ;  
+std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index ) ;  
 
 void orientedTag ( std::vector<std::vector<int> > &v );
 

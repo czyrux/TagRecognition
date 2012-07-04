@@ -63,9 +63,9 @@ Image_data* loadPixelsFilter(int* pixels, int width, int height,
 	//assign pointer to return
 	Image_data* image = new Image_data;
 	image->src = img;
-	image->red = img_red;
-	image->blue = img_blue;
-	image->green = img_green;
+	image->rImage = img_red;
+	image->bImage = img_blue;
+	image->gImage = img_green;
 
 	return image;
 }

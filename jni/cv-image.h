@@ -11,9 +11,9 @@
 extern "C" {
 #endif
 
-#define RED_BOUNDARY 0
+#define RED_BOUNDARY -10
 #define BLUE_BOUNDARY -20
-#define GREEN_BOUNDARY -40
+#define GREEN_BOUNDARY -60
 
 struct bmpfile_header {
   unsigned char magic[2];
@@ -39,9 +39,9 @@ struct bmp_dib_v3_header_t {
 
 struct Image_data {
   IplImage* src;
-  IplImage* red;
-  IplImage* blue;
-  IplImage* green;
+  IplImage* rImage;
+  IplImage* bImage;
+  IplImage* gImage;
 };
 
 //

@@ -7,10 +7,7 @@ std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& s
     std::vector<std::string> solution;
     solution.clear();
     for ( int i=0 ; i<subsquares.size() ; i++ ) {
-        std::stringstream os;
-        solution.push_back(decodeTag(subsquares[i]));
-        os << i << ": " << solution[i];
-        LOGI(os.str().c_str());
+        solution.push_back(decodeTag(subsquares[i],i) );
     }
 
     return solution;
@@ -20,24 +17,27 @@ std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& s
 
 //HACERLA PARA UN CUADRADO ALREDEDOR DEL PUNTO
 bool checkPoint ( const cv::Mat& image , int y , int x , uchar colour ) {
-    for ( int i=-2 ; i<2 ; i++ )
-        for ( int j=-2 ; j<2 ; j++ )
+    //return (image.at<uchar>(y, x) == colour );  
+    for ( int i=-1 ; i<1 ; i++ )
+        for ( int j=-1 ; j<1 ; j++ )
             if ( image.at<uchar>(y+i, x+j) == colour )
                 return true;
-        
     return false;
 }
 
 /**************************************/
 
-std::string decodeTag (const std::vector<cv::Mat>& subsquares ) {
+//USA LA GRANDE TAMB
+std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
 	std::string tag;
 	LOGI("decoding...");
-	if ( subsquares.size() != 3) {
+	/*if ( subsquares.size() != 3) {
+        LOGE("not enough parameters");
     	return 0;
-    }
+    }*/
     //Matrix's for the three spaces of colour
-	cv::Mat rImage = subsquares[0] , gImage = subsquares[1] , bImage = subsquares[2] ;
+	cv::Mat rImage = subsquares[0] , gImage = subsquares[1] , bImage = subsquares[2] ,
+    img = subsquares[3];
 	
 	//CONSTANT FOR TAGS
 	int cols = COLS , rows = ROWS;
@@ -47,7 +47,7 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares ) {
     }
 
 	//Value of increment for the index
-	int incWidth = rImage.cols/cols+1 , incHeight = rImage.rows/rows ;
+	int incWidth = rImage.cols/cols , incHeight = rImage.rows/rows ;
 
     //y height-rows , x width-cols
     //Check the tag
@@ -74,7 +74,8 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares ) {
         	else
         		v[i][j] = DEFAULT_VALUE;
 
-        	//cv::Point p(x,y); //(x,y)
+        	cv::Point p(x,y); //(x,y)
+            cv::circle(img, p , 2, cv::Scalar(0,255,255),1,CV_AA);
         	//cv::circle(rImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
         	//cv::circle(gImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
 			//cv::circle(bImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
@@ -82,7 +83,7 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares ) {
 	}
 
 	//Print matrix
-    /*
+    LOGI("Readed");
 	for ( int i=0 ; i<v.size() ; i++ ) {
 		std::stringstream os;
 		for (int j=0 ; j<v[0].size() ; j++ ) {
@@ -90,7 +91,6 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares ) {
 		}
 		LOGI(os.str().c_str());
 	}
-    */
 	
     //Oriented tag
     orientedTag(v);
@@ -103,6 +103,14 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares ) {
         }
     tag = os.str();
 
+    //LOG
+    LOGI(tag.c_str());
+    if ( tag == "123211131323" )
+        LOGI("CHECKED");
+
+    std::stringstream file;
+    file << "/mnt/sdcard/Pictures/MyCameraApp/points_" << index << ".jpeg";
+    cv::imwrite(file.str().c_str(),img);
     /*
 	std::string file = "/mnt/sdcard/Pictures/MyCameraApp/pointsR.jpeg";
     cv::imwrite(file,rImage);

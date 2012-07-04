@@ -74,7 +74,7 @@ public class TagRecognitionActivity extends Activity {
 	private PictureCallback jpegCallback = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
-			long start , end , elapse;
+			Long start , end , elapse;
 			start = System.currentTimeMillis();
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inSampleSize = 4; // make the picture 1/4 of size
@@ -106,6 +106,7 @@ public class TagRecognitionActivity extends Activity {
 			elapse = end - start;
 			Toast.makeText(TagRecognitionActivity.this, "" + elapse + " ms is used to extract features.",
 					Toast.LENGTH_LONG).show();
+			Log.d(TAG, elapse.toString() + " ms");
 			
 			//WITH ROTATE OUTSIDE = 800 MS
 			//SIN ROTATE 600 MS
