@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
-    <string name="hello">Hello World, TagRecognitionActivity!</string>
     <string name="app_name">TagRecognition</string>
-    <string name="recognize_label">Recognize tags</string>
     <string name="calibrate_label">Calibrate</string>
-
+    <string name="radar_label">Recognize tags</string>
+    <string name="help_label">info</string>
+    <string name="radar_description">Start the scanning of tags periodically sending the info by net. Need to be calibrate previously</string>
+    <string name="info_description">Help menu</string>
 </resources>

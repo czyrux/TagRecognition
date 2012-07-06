@@ -10,6 +10,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
@@ -21,7 +23,9 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Environment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
@@ -34,11 +38,13 @@ public class TagRecognitionActivity extends Activity {
 	public static final int MEDIA_TYPE_IMAGE = 1;
 
 	private Preview _mPreview;
-	// private Camera mCamera;
-	private Timer _timer ;
+	private Timer _timer;
 	private OpenCV _opencv = new OpenCV();
-	private Button _recognize;
-	private Button _calibrate;
+	AlertDialog _helpMenu;
+
+	private Button _btn_calibrate;
+	private Button _btn_radar;
+	private Button _btn_help;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -52,44 +58,93 @@ public class TagRecognitionActivity extends Activity {
 
 		_mPreview = new Preview(this);
 		((FrameLayout) findViewById(R.id.preview)).addView(_mPreview);
-		
-		RelativeLayout relativeLayoutControls = (RelativeLayout) findViewById(R.id.controls_layout);
-        relativeLayoutControls.bringToFront();
-        
-        _recognize = (Button) findViewById(R.id.recognize_action);
-        _calibrate = (Button) findViewById(R.id.calibrate_action);
-        
-        //action for recognize button
-        _recognize.setOnClickListener( new View.OnClickListener() {
-        		@Override
-        		public void onClick(View v) {
-        			_timer = new Timer();
-        			_timer.schedule(new UpdateTimeTask(), 1000, 2000);
-        		}
-    		}
-    	);
-        _recognize.setEnabled(false);
-        
-        //actions for calibrate button
-        _calibrate.setOnClickListener( new View.OnClickListener() {
-    			@Override
-    			public void onClick(View v) {
-    				_recognize.setEnabled(true);
-    			}
-			}
-        );
 
+		RelativeLayout relativeLayoutControls = (RelativeLayout) findViewById(R.id.controls_layout);
+		relativeLayoutControls.bringToFront();
+
+		_btn_help = (Button) findViewById(R.id.help_action);
+		_btn_radar = (Button) findViewById(R.id.recognize_action);
+		_btn_calibrate = (Button) findViewById(R.id.calibrate_action);
+
+		// recognize button action
+		_btn_radar.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				_btn_radar.setEnabled(false);
+				_timer = new Timer();
+				_timer.schedule(new UpdateTimeTask(), 1000, 2000);
+			}
+		});
+		_btn_radar.setEnabled(false);
+
+		// actions for calibrate button
+		_btn_calibrate.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// enable option buttons
+				_btn_calibrate.setEnabled(false);
+				_btn_radar.setEnabled(true);
+			}
+		});
+
+		_btn_help.setOnClickListener(new View.OnClickListener() {
+			@Override
+			public void onClick(View v) {
+				// enable option buttons
+				_btn_calibrate.setEnabled(true);
+				_btn_radar.setEnabled(false);
+				//show alert dialog
+				createHelpMenu();
+				/*
+				 * Dialog dialog = new Dialog(TagRecognitionActivity.this);
+				 * dialog.setCancelable(true);
+				 * dialog.setContentView(R.layout.help);
+				 * dialog.setTitle("info"); dialog.show();
+				 */
+				
+			}
+		});
+		
+		createHelpMenu();
+	}
+	
+	//Create the alert dialog
+	private void createHelpMenu() {
+			// Get layout
+			LayoutInflater inflater = getLayoutInflater();
+			View dialoglayout = inflater.inflate(R.layout.help,
+					(ViewGroup) getCurrentFocus());
+			// Create builder and set options
+			AlertDialog.Builder builder = new AlertDialog.Builder(
+					TagRecognitionActivity.this);
+			builder.setTitle("TagRecognizer")
+					.setCancelable(true)
+					.setView(dialoglayout)
+					.setPositiveButton("Accept",
+							new DialogInterface.OnClickListener() {
+								public void onClick(DialogInterface dialog,
+										int which) {
+									_helpMenu.cancel();
+								}
+							});
+			// .setIcon(R.drawable.icon);
+			// Set builder
+			_helpMenu = builder.create();
+			// show alertdialog
+			_helpMenu.show();
 	}
 
+	// for the temporal calling to task
 	int i = 0;
-	//for the temporal calling to task
+
 	class UpdateTimeTask extends TimerTask {//
 		public void run() {
 			if (i < 1) {
-				Log.d(TAG, "foto " + i);
+				Log.d(TAG, "taken foto " + i);
 				_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
 					public void onAutoFocus(boolean success, Camera camera) {
-							camera.takePicture(null, null, jpegCallback);
+						camera.takePicture(null, null, jpegCallback);
+						_btn_radar.setEnabled(true);
 					}
 				});
 			} else
@@ -102,7 +157,7 @@ public class TagRecognitionActivity extends Activity {
 	private PictureCallback jpegCallback = new PictureCallback() {
 		@Override
 		public void onPictureTaken(byte[] data, Camera camera) {
-			Long start , end , elapse;
+			Long start, end, elapse;
 			start = System.currentTimeMillis();
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inSampleSize = 4; // make the picture 1/4 of size
@@ -110,39 +165,38 @@ public class TagRecognitionActivity extends Activity {
 			Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length,
 					options);
 
-			// Rotate the image to 90			
+			// Rotate the image to 90
 			Matrix mtx = new Matrix();
 			mtx.postRotate(90);
 
 			// Rotating Bitmap
 			Bitmap bmpRotate = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(),
 					bmp.getHeight(), mtx, true);
-			
 
 			// Filter image
-			//208 ms jni
-			//1700 ms java
-			
+			// 208 ms jni
+			// 1700 ms java
+
 			/**
-			 * JNI ALGORITHM2 WORKING (complete program)
-			 * FAST 840 ms
-			 * SURF 4000ms
+			 * JNI ALGORITHM2 WORKING (complete program) FAST 840 ms SURF 4000ms
 			 */
-			
+
 			Bitmap bmpExtract2 = _opencv.openCV(bmpRotate);
 			end = System.currentTimeMillis();
 			elapse = end - start;
-			Toast.makeText(TagRecognitionActivity.this, "" + elapse + " ms is used to extract features.",
+			Toast.makeText(TagRecognitionActivity.this,
+					"" + elapse + " ms is used to extract features.",
 					Toast.LENGTH_LONG).show();
 			Log.d(TAG, elapse.toString() + " ms");
-			
-			//WITH ROTATE OUTSIDE = 800 MS
-			//SIN ROTATE 600 MS
-			//WITH ROTATE INSIDE = 800ms
-			
+
+			// WITH ROTATE OUTSIDE = 800 MS
+			// SIN ROTATE 600 MS
+			// WITH ROTATE INSIDE = 800ms
+
 			// Store the image
 			storeBitmap(bmpRotate, "IMG_0_");
-			if (bmpExtract2!=null)storeBitmap(bmpExtract2, "IMG_1_");
+			if (bmpExtract2 != null)
+				storeBitmap(bmpExtract2, "IMG_1_");
 
 			// Continue with the preview
 			_mPreview.mCamera.startPreview();
@@ -150,13 +204,12 @@ public class TagRecognitionActivity extends Activity {
 	};
 
 	// Save Bitmap
-	private void storeBitmap (Bitmap bmp , String head ) {
+	private void storeBitmap(Bitmap bmp, String head) {
 		int quality = 100;
 
 		File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE, head);
 		if (pictureFile == null) {
-			Log.d(TAG,
-					"Error creating media file, check storage permissions: ");
+			Log.d(TAG, "Error creating media file, check storage permissions: ");
 			return;
 		}
 		// Store the image
@@ -218,6 +271,9 @@ public class TagRecognitionActivity extends Activity {
 	protected void onDestroy() {
 		super.onDestroy();
 		this.cleanTimer();
+		if ( _helpMenu != null ) {
+			_helpMenu.cancel();
+		}
 	}
 
 	@Override
@@ -226,7 +282,7 @@ public class TagRecognitionActivity extends Activity {
 		_mPreview.release();
 	}
 
-	//Delete timer
+	// Delete timer
 	private void cleanTimer() {
 		if (_timer != null) {
 			_timer.cancel();

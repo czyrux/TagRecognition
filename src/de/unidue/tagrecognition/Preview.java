@@ -32,27 +32,28 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		mCamera = Camera.open();
 		Camera.Parameters p = mCamera.getParameters();
 		List<String> focusModes = p.getSupportedFocusModes();
-		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO))
-		{
-		    p.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
+		if (focusModes.contains(Camera.Parameters.FOCUS_MODE_AUTO)) {
+			p.setFocusMode(Camera.Parameters.FOCUS_MODE_AUTO);
 		}
-		
+
 		p.setPictureFormat(PixelFormat.JPEG);
-		p.setJpegQuality(100);
 		// best quality
-		int pos = (p.getSupportedPictureSizes().size() - 1);//0;//
-		p.setPictureSize(
-				p.getSupportedPictureSizes().get(pos).width,
-				p.getSupportedPictureSizes().get(pos).height);
+		p.setJpegQuality(100);
 		
+		//max resolution
+		int pos = (p.getSupportedPictureSizes().size() - 1);
+		p.setPictureSize(p.getSupportedPictureSizes().get(pos).width, p
+				.getSupportedPictureSizes().get(pos).height);
+
 		Log.d(TAG, "Focus mode: " + p.getFocusMode());
-		Log.d(TAG, "Picture size choosen: " + p.getPictureSize().height + "x" + p.getPictureSize().width);
+		Log.d(TAG, "Picture size choosen: " + p.getPictureSize().height + "x"
+				+ p.getPictureSize().width);
 		mCamera.setParameters(p);
 
 		/*
-		for (Size i : p.getSupportedPictureSizes())
-			Log.d("debug", "size: " + i.height + "x" + i.width);
-		*/
+		 * for (Size i : p.getSupportedPictureSizes()) Log.d("debug", "size: " +
+		 * i.height + "x" + i.width);
+		 */
 
 		try {
 			mCamera.setPreviewDisplay(holder);
@@ -113,12 +114,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	// Called when holder has changed
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		// stop preview before making changes-- Disable for problems with Autofocus
-		/*try {
-			mCamera.stopPreview();
-		} catch (Exception e) {
-			Log.d(TAG, "Error stopping camera preview: " + e.getMessage());
-		}*/
+		// stop preview before making changes-- Disable for problems with
+		// Autofocus
+		/*
+		 * try { mCamera.stopPreview(); } catch (Exception e) { Log.d(TAG,
+		 * "Error stopping camera preview: " + e.getMessage()); }
+		 */
 
 		Camera.Parameters parameters = mCamera.getParameters();
 		// set preview size and make any resize, rotate or
