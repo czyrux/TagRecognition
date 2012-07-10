@@ -30,11 +30,7 @@ bool checkPoint ( const cv::Mat& image , int y , int x , uchar colour ) {
 //USA LA GRANDE TAMB
 std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
 	std::string tag;
-	LOGI("decoding...");
-	/*if ( subsquares.size() != 3) {
-        LOGE("not enough parameters");
-    	return 0;
-    }*/
+	LOGI("DECODING...");
     //Matrix's for the three spaces of colour
 	cv::Mat rImage = subsquares[0] , gImage = subsquares[1] , bImage = subsquares[2] ,
     img = subsquares[3];
@@ -83,7 +79,7 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
 	}
 
 	//Print matrix
-    LOGI("Readed");
+    LOGI("Tag Readed");
 	for ( int i=0 ; i<v.size() ; i++ ) {
 		std::stringstream os;
 		for (int j=0 ; j<v[0].size() ; j++ ) {
@@ -95,6 +91,16 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
     //Oriented tag
     orientedTag(v);
 
+    //Print matrix
+    /*LOGI("Oriented");
+    for ( int i=0 ; i<v.size() ; i++ ) {
+        std::stringstream os;
+        for (int j=0 ; j<v[0].size() ; j++ ) {
+            os << " " << v[i][j];
+        }
+        LOGI(os.str().c_str());
+    }*/
+
     //Create string for tag
     std::stringstream os;
     for ( int i=0 ; i<v.size() ; i++ )
@@ -105,11 +111,11 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
 
     //LOG
     LOGI(tag.c_str());
-    if ( tag == "123211131323" )
+    if ( tag == "12321113" )
         LOGI("CHECKED");
 
     std::stringstream file;
-    file << "/mnt/sdcard/Pictures/MyCameraApp/points_" << index << ".jpeg";
+    file << PATH + "points_" << index << ".jpeg";
     cv::imwrite(file.str().c_str(),img);
     /*
 	std::string file = "/mnt/sdcard/Pictures/MyCameraApp/pointsR.jpeg";
@@ -120,7 +126,7 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
     cv::imwrite(file,bImage); 
     */
     
-    LOGI("decode done");
+    LOGI(".... DONE");
 	return tag;
 }
 
@@ -152,10 +158,11 @@ void orientedTag ( std::vector<std::vector<int> > &v ) {
 
     //if not, oriented
     if (!oriented) {
-        for ( int i=0 , k = (v.size()-1) ; i<(v.size()/2)+1 ; i++ , k-- )
+        for ( int i=0 , k = (v.size()-1) ; i<(v.size()/2)+1 && i <= k ; i++ , k-- ) {
             for ( int j=0 , l = v[0].size()-1; j<(v[0].size()) && !(j >= l && i==k) ; j++ , l-- ) {
                 std::swap(v[i][j],v[k][l]);
             }
+        }
     }
 } 
 

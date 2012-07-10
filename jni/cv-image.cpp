@@ -54,12 +54,6 @@ Image_data* loadPixelsFilter(int* pixels, int width, int height,
 		}
 	}
 
-	/* thresholding
-	cvSplit(img, img_blue, img_green, img_red, NULL);
-	cvThreshold(img_blue, img_blue, 150, 255, CV_THRESH_BINARY);
-	cvThreshold(img_green, img_green, 150, 255, CV_THRESH_BINARY);
-	cvThreshold(img_red, img_red, 150, 255, CV_THRESH_BINARY);
-	*/
 	//assign pointer to return
 	Image_data* image = new Image_data;
 	image->src = img;

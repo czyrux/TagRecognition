@@ -120,7 +120,15 @@ void drawSquares( cv::Mat& image, const std::vector<Square>& squares )
 /**************************************/
 
 void removeBorder ( cv::Mat & img ) {
-    int w = img.cols * WIDTH_BORDER , h = img.rows * HEIGHT_BORDER;
+    int w , h;
+    if (img.cols > img.rows ) {
+        w = img.cols * WIDTH_BORDER;
+        h = img.rows * HEIGHT_BORDER;
+    }else {
+        w = img.cols * HEIGHT_BORDER;
+        h = img.rows * WIDTH_BORDER;
+    }
+
     img = img( cv::Rect(w, h, (img.cols-w*2) , (img.rows-h*2)) );
 }
 

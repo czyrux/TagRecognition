@@ -10,4 +10,6 @@ static jint RED_BOUNDARY = 0;
 static jint BLUE_BOUNDARY = 0; //-20
 static jint GREEN_BOUNDARY = 0;//-60
 
+static std::string PATH = "/mnt/sdcard/Pictures/TagRecognizerApp/";
+
 #endif //CONSTANTS_H

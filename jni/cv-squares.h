@@ -12,10 +12,10 @@
 extern "C" {
 #endif
 
-#define LIMIT_ROTATION 4 //degrees
+#define LIMIT_ROTATION 2 //degrees
 #define MIN_RECT_SIZE 20 //size in pixels
-#define WIDTH_BORDER 1/11.
-#define HEIGHT_BORDER 1/9.
+#define WIDTH_BORDER 1/10.
+#define HEIGHT_BORDER 1/5.
 
 /**************************************/
 

@@ -44,6 +44,7 @@ public final class R {
         public static final int radar38=0x7f040004;
         public static final int radar48=0x7f040005;
         public static final int radar48_grey=0x7f040006;
+        public static final int tag25=0x7f040007;
     }
     public static final class string {
         public static final int app_name=0x7f060000;

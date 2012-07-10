@@ -34,13 +34,12 @@ import android.widget.RelativeLayout;
 import android.widget.Toast;
 
 public class TagRecognitionActivity extends Activity {
-	private static final String TAG = "CVJNI_Activity";
-	public static final int MEDIA_TYPE_IMAGE = 1;
+	private static final String NAME = "TagRecognizer";
 
 	private Preview _mPreview;
 	private Timer _timer;
 	private JniWrapper _jni ;
-	AlertDialog _helpMenu;
+	private AlertDialog _helpMenu;
 
 	private Button _btn_calibrate;
 	private Button _btn_radar;
@@ -88,7 +87,7 @@ public class TagRecognitionActivity extends Activity {
 				// enable option buttons
 				_btn_calibrate.setEnabled(false);
 				_btn_radar.setEnabled(true);
-				_jni.calibration();
+				//_jni.calibration();
 			}
 		});
 
@@ -124,6 +123,7 @@ public class TagRecognitionActivity extends Activity {
 			builder.setTitle("TagRecognizer")
 					.setCancelable(true)
 					.setView(dialoglayout)
+					.setIcon(R.raw.tag25)
 					.setPositiveButton("Accept",
 							new DialogInterface.OnClickListener() {
 								public void onClick(DialogInterface dialog,
@@ -144,7 +144,7 @@ public class TagRecognitionActivity extends Activity {
 	class UpdateTimeTask extends TimerTask {//
 		public void run() {
 			if (i < 1) {
-				Log.d(TAG, "taken foto " + i);
+				Log.d(NAME, "taken foto " + i);
 				_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
 					public void onAutoFocus(boolean success, Camera camera) {
 						camera.takePicture(null, null, jpegCallback);
@@ -191,14 +191,14 @@ public class TagRecognitionActivity extends Activity {
 			Toast.makeText(TagRecognitionActivity.this,
 					"" + elapse + " ms is used to extract features.",
 					Toast.LENGTH_LONG).show();
-			Log.d(TAG, elapse.toString() + " ms");
+			Log.d(NAME, elapse.toString() + " ms");
 
 			// WITH ROTATE OUTSIDE = 800 MS
 			// SIN ROTATE 600 MS
 			// WITH ROTATE INSIDE = 800ms
 
 			// Store the image
-			storeBitmap(bmpRotate, "IMG_0_");
+			//storeBitmap(bmpRotate, "IMG_0_");
 			if (bmpExtract2 != null)
 				storeBitmap(bmpExtract2, "IMG_1_");
 
@@ -211,29 +211,29 @@ public class TagRecognitionActivity extends Activity {
 	private void storeBitmap(Bitmap bmp, String head) {
 		int quality = 100;
 
-		File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE, head);
+		File pictureFile = getOutputMediaFile(head);
 		if (pictureFile == null) {
-			Log.d(TAG, "Error creating media file, check storage permissions: ");
+			Log.d(NAME, "Error creating media file, check storage permissions: ");
 			return;
 		}
 		// Store the image
 		try {
-			Log.d(TAG, pictureFile.toString());
+			//Log.d(NAME, pictureFile.toString());
 			FileOutputStream fos = new FileOutputStream(pictureFile);
 			bmp.compress(CompressFormat.JPEG, quality, fos);
 			fos.flush();
 			fos.close();
 		} catch (FileNotFoundException e) {
-			Log.d(TAG, "File not found: " + e.getMessage());
+			Log.d(NAME, "File not found: " + e.getMessage());
 		} catch (IOException e) {
-			Log.d(TAG, "Error accessing file: " + e.getMessage());
+			Log.d(NAME, "Error accessing file: " + e.getMessage());
 		} catch (Exception e) {
-			Log.d(TAG, "Unkown error: " + e.getMessage());
+			Log.d(NAME, "Unkown error: " + e.getMessage());
 		}
 	}
 
 	// Create a File for saving an image
-	private File getOutputMediaFile(int type, String head) {
+	private File getOutputMediaFile(String head) {
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.
 
@@ -242,12 +242,12 @@ public class TagRecognitionActivity extends Activity {
 		File mediaStorageDir = new File(
 				Environment
 						.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
-				"MyCameraApp");
+				NAME +"App");
 
 		// Create the storage directory if it does not exist
 		if (!mediaStorageDir.exists()) {
 			if (!mediaStorageDir.mkdirs()) {
-				Log.d("MyCameraApp", "failed to create directory");
+				Log.d(NAME, "failed to create directory");
 				return null;
 			}
 		}
@@ -255,13 +255,8 @@ public class TagRecognitionActivity extends Activity {
 		// Create a media file name
 		String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss")
 				.format(new Date());
-		File mediaFile;
-		if (type == MEDIA_TYPE_IMAGE) {
-			mediaFile = new File(mediaStorageDir.getPath() + File.separator
+		File mediaFile = new File(mediaStorageDir.getPath() + File.separator
 					+ head + timeStamp + ".jpeg");
-		} else {
-			return null;
-		}
 
 		return mediaFile;
 	}

@@ -6,9 +6,10 @@
 #include <cxcore.h>
 #include <opencv2/highgui/highgui.hpp>
 #include "cv-log.h"
+#include "cv-constants.h"
 
 #define COLS 4
-#define ROWS 3
+#define ROWS 2
 
 #define RED_VALUE 1
 #define BLUE_VALUE 2

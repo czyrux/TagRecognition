@@ -105,8 +105,8 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNI
 
     //Update the values to java
     RED_BOUNDARY = 0;
-    GREEN_BOUNDARY = -20;
-    BLUE_BOUNDARY = -60;
+    BLUE_BOUNDARY = -20;
+    GREEN_BOUNDARY = -60;
     env->SetIntField(thiz, rId, RED_BOUNDARY);
     env->SetIntField(thiz, gId, GREEN_BOUNDARY);
     env->SetIntField(thiz, bId, BLUE_BOUNDARY);
@@ -118,6 +118,74 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNI
 JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagRecognizer(
 		JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
 		jint height) 
+{
+    //load the image
+    Image_data* data = getIplImageFromIntArray(env, photo_data, width, height);
+    if (data == NULL) {
+        LOGE("Image data couldn't be loaded.");
+        return 0;
+    }
+
+    cv::Mat img1 (data->src,false) , img2 (data->rImage,false) , img3 (data->bImage,false) , img4 (data->gImage,false); //NOT COPY OF IMAGE
+    std::string file1 = PATH + "filter_src.jpeg";
+    //cv::imwrite(file1,img1);
+    file1 = PATH + "filter_red.jpeg";
+    cv::imwrite(file1,img2);
+    file1 = PATH + "filter_green.jpeg";
+    cv::imwrite(file1,img4);
+    file1 =  PATH + "filter_blue.jpeg";
+    cv::imwrite(file1,img3);
+    
+
+    //Convert IplImage to Mat
+    cv::Mat img (data->rImage,false); //NOT COPY OF IMAGE
+    cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
+    
+    //find squares on image
+    std::vector<Square> squares;
+    findSquares(img, squares);
+
+    //log
+    std::stringstream os;
+    os << "Square found before: " << squares.size() ;
+    
+    //remove squares inside others ones
+    filterSquares(squares);
+
+    //log
+    os << " later: " << squares.size() ;
+    LOGI(os.str().c_str());
+
+    //cut squares
+    std::vector<std::vector<cv::Mat> > subsquares;
+    cutSquares(data,squares,subsquares);
+
+    //recognize tag's in squares
+    decodeTags(subsquares);
+
+    //draw them
+    drawSquares(img_org, squares);
+    std::string file = PATH + "src_squares.jpeg";
+    cv::imwrite(file,img_org);
+    
+
+    //release memory
+    if (data->src)  cvReleaseImage(&data->src);
+    if (data->rImage)  cvReleaseImage(&data->rImage);
+    if (data->gImage)cvReleaseImage(&data->gImage);
+    if (data->bImage) cvReleaseImage(&data->bImage);
+    delete data;
+  	
+    //return the image with the squares
+    //return getBmpImage(env,&img_org.operator IplImage());
+    return 0;
+}
+
+/**************************************/
+
+JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_JniWrapper_calibrate(
+        JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
+        jint height) 
 {
     //load the image
     Image_data* data = getIplImageFromIntArray(env, photo_data, width, height);
@@ -175,7 +243,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagReco
     if (data->gImage)cvReleaseImage(&data->gImage);
     if (data->bImage) cvReleaseImage(&data->bImage);
     delete data;
-  	
+    
     //return the image with the squares
     //return getBmpImage(env,&img_org.operator IplImage());
     return 0;
