@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TagRecognition</string>
-    <string name="calibrate_label">Calibrate</string>
-    <string name="radar_label">Recognize tags</string>
-    <string name="help_label">info</string>
-    <string name="radar_description">Start the scanning of tags periodically sending the info by net. Need to be calibrate previously</string>
-    <string name="info_description">Help menu</string>
+    <string name="app_name">Tag Recognizer</string>
+    <string name="btn_calibrate_label">Calibrate</string>
+    <string name="btn_radar_label">Search tags</string>
+    <string name="btn_help_label"></string>
+    <string name="btn_radar_description">Search tags using the camera and send the result founded to the server net. Need to be previously calibrated.</string>
+    <string name="btn_info_description">Help menu</string>
+    <string name="btn_calibrate_description">Calibrate the values of red, blue and green, in order, to detect this colors in the image. Used a template tag to calibrate.</string>
 </resources>

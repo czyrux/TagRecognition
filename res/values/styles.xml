@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="button_style" parent="android:style/Widget.Button">
+    <style name="btn_style" parent="android:style/Widget.Button">
         <item name="android:textSize">15sp</item>
         <item name="android:textStyle">bold|italic</item>
         <item name="android:textColor">@drawable/textcolor_button</item>

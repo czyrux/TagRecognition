@@ -6,14 +6,11 @@
 #include <cv.h>
 #include <cxcore.h>
 #include "cv-log.h"
+#include "cv-constants.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define RED_BOUNDARY -10
-#define BLUE_BOUNDARY -20
-#define GREEN_BOUNDARY -60
 
 struct bmpfile_header {
   unsigned char magic[2];

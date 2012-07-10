@@ -11,10 +11,23 @@
 #include "cv-squares.h"
 #include "cv-tag.h"
 #include "cv-log.h"
+#include "cv-constants.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**************************************/
+
+/*
+ * error reporting
+ */
+void envDump(JNIEnv *env) {
+  if (env->ExceptionCheck()) {
+    env->ExceptionDescribe();
+    env->ExceptionClear();
+  }
+}
 
 /**************************************/
 /*
@@ -47,12 +60,62 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_extractFAST
   	
   	return getBmpImage(env,&img.operator IplImage());
 }
+*/
 
+/**************************************/
+
+JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNIEnv* env, jobject thiz) {
+
+    //Taking reference to the class
+    jclass callbackClass = env->GetObjectClass(thiz);
+    if (!callbackClass) {
+        LOGE("setup//failed to discover class");
+        envDump(env);
+        return;
+    }
+
+    //Making global reference
+    //callbackClass = (jclass) env->NewGlobalRef(tempClass);
+    //env->DeleteLocalRef(tempClass);
+
+    //Getting id's from variables
+    rId = env->GetFieldID(callbackClass, "_RED_BOUNDARY", "I");
+    if (!rId) {
+        LOGE("setup//RED_BOUNDARY find failure");
+        envDump(env);
+        return;
+    }
+    gId = env->GetFieldID(callbackClass, "_GREEN_BOUNDARY", "I");
+    if (!rId) {
+        LOGE("setup//GREEN_BOUNDARY find failure");
+        envDump(env);
+        return;
+    }
+    bId = env->GetFieldID(callbackClass, "_BLUE_BOUNDARY", "I");
+    if (!rId) {
+        LOGE("setup//BLUE_BOUNDARY find failure");
+        envDump(env);
+        return;
+    }
+
+    //Get values from Java
+    RED_BOUNDARY = (jint) env->GetObjectField(thiz, rId);
+    GREEN_BOUNDARY = (jint) env->GetObjectField(thiz, gId);
+    BLUE_BOUNDARY = (jint) env->GetObjectField(thiz, bId);
+
+    //Update the values to java
+    RED_BOUNDARY = 0;
+    GREEN_BOUNDARY = -20;
+    BLUE_BOUNDARY = -60;
+    env->SetIntField(thiz, rId, RED_BOUNDARY);
+    env->SetIntField(thiz, gId, GREEN_BOUNDARY);
+    env->SetIntField(thiz, bId, BLUE_BOUNDARY);
+}
 
 /**************************************/
 
 
-JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_tagRecognizer(
+JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagRecognizer(
 		JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
 		jint height) 
 {

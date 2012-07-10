@@ -39,7 +39,7 @@ public class TagRecognitionActivity extends Activity {
 
 	private Preview _mPreview;
 	private Timer _timer;
-	private OpenCV _opencv = new OpenCV();
+	private JniWrapper _jni ;
 	AlertDialog _helpMenu;
 
 	private Button _btn_calibrate;
@@ -56,6 +56,10 @@ public class TagRecognitionActivity extends Activity {
 
 		setContentView(R.layout.main);
 
+		_jni = new JniWrapper();
+		_timer = null;
+		_helpMenu = null;
+		
 		_mPreview = new Preview(this);
 		((FrameLayout) findViewById(R.id.preview)).addView(_mPreview);
 
@@ -84,6 +88,7 @@ public class TagRecognitionActivity extends Activity {
 				// enable option buttons
 				_btn_calibrate.setEnabled(false);
 				_btn_radar.setEnabled(true);
+				_jni.calibration();
 			}
 		});
 
@@ -105,7 +110,6 @@ public class TagRecognitionActivity extends Activity {
 			}
 		});
 		
-		createHelpMenu();
 	}
 	
 	//Create the alert dialog
@@ -181,7 +185,7 @@ public class TagRecognitionActivity extends Activity {
 			 * JNI ALGORITHM2 WORKING (complete program) FAST 840 ms SURF 4000ms
 			 */
 
-			Bitmap bmpExtract2 = _opencv.openCV(bmpRotate);
+			Bitmap bmpExtract2 = _jni.tagRecognizer(bmpRotate);
 			end = System.currentTimeMillis();
 			elapse = end - start;
 			Toast.makeText(TagRecognitionActivity.this,

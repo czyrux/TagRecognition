@@ -12,30 +12,31 @@
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
         android:drawableTop="@drawable/calibrate_button" 
-        android:text="@string/calibrate_label"
-        style="@style/button_style"
+        android:text="@string/btn_calibrate_label"
+        android:contentDescription="@string/btn_calibrate_description"
+        style="@style/btn_style"
          />
 	
     <Button
         android:id="@+id/recognize_action"
-        android:contentDescription="@string/radar_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
+        android:contentDescription="@string/btn_radar_description"
+        android:text="@string/btn_radar_label"
         android:drawableTop="@drawable/radar_button" 
-        android:text="@string/radar_label"
-        style="@style/button_style"/>
+        style="@style/btn_style"/>
     
     <Button
         android:id="@+id/help_action"
-        android:contentDescription="@string/info_description"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:drawableTop="@drawable/help_button" 
-        android:text="@string/help_label"
-        style="@style/button_style"/>
+        android:contentDescription="@string/btn_info_description"
+        android:text="@string/btn_help_label"
+        style="@style/btn_style"/>
 
 </RelativeLayout>

@@ -47,13 +47,14 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f060000;
-        public static final int calibrate_label=0x7f060001;
-        public static final int help_label=0x7f060003;
-        public static final int info_description=0x7f060005;
-        public static final int radar_description=0x7f060004;
-        public static final int radar_label=0x7f060002;
+        public static final int btn_calibrate_description=0x7f060006;
+        public static final int btn_calibrate_label=0x7f060001;
+        public static final int btn_help_label=0x7f060003;
+        public static final int btn_info_description=0x7f060005;
+        public static final int btn_radar_description=0x7f060004;
+        public static final int btn_radar_label=0x7f060002;
     }
     public static final class style {
-        public static final int button_style=0x7f070000;
+        public static final int btn_style=0x7f070000;
     }
 }
