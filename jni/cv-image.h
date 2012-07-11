@@ -6,11 +6,15 @@
 #include <cv.h>
 #include <cxcore.h>
 #include "cv-log.h"
-#include "cv-constants.h"
+//#include "cv-constants.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+extern int RED_BOUNDARY;
+extern int BLUE_BOUNDARY;
+extern int GREEN_BOUNDARY;
 
 struct bmpfile_header {
   unsigned char magic[2];
@@ -42,15 +46,14 @@ struct Image_data {
 };
 
 //
-IplImage* loadPixels(int* pixels, int width, int height);
+//IplImage* loadPixels(int* pixels, int width, int height);
 
 //
-Image_data* loadPixelsFilter(int* pixels, int width, int height , 
+Image_data* loadPixelsFiltered(int* pixels, int width, int height , 
   bool red_filter=true , bool green_filter=true , bool blue_filter=true);
 
 //
-Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data,
-    jint width, jint height );
+Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data , int width, int height );
 
 //
 jbooleanArray getBmpImage( JNIEnv* env, IplImage* pImage );

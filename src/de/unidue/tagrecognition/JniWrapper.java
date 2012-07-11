@@ -15,7 +15,7 @@ public class JniWrapper {
 
 	private native boolean calibrate(int[] pixels, int width, int height);
 
-	private native void nativeSetup();
+	//private native void nativeSetup();
 
 	// shared variables
 	private int _RED_BOUNDARY;
@@ -27,7 +27,7 @@ public class JniWrapper {
 		_BLUE_BOUNDARY = -10;
 		_GREEN_BOUNDARY = -20;
 
-		nativeSetup();
+		//nativeSetup();
 	}
 
 	public Bitmap tagRecognizer(Bitmap bitmap) {

@@ -11,11 +11,15 @@
 #include "cv-squares.h"
 #include "cv-tag.h"
 #include "cv-log.h"
-#include "cv-constants.h"
+//#include "cv-constants.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+/**************************************/
+
+const std::string TEMPLATE_TAG = "12321113";
 
 /**************************************/
 
@@ -60,11 +64,12 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_extractFAST
   	
   	return getBmpImage(env,&img.operator IplImage());
 }
-*/
+
 
 /**************************************/
-
-JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNIEnv* env, jobject thiz) {
+/*
+JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNIEnv* env, jobject thiz) 
+{
 
     //Taking reference to the class
     jclass callbackClass = env->GetObjectClass(thiz);
@@ -102,7 +107,8 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNI
     RED_BOUNDARY = (jint) env->GetObjectField(thiz, rId);
     GREEN_BOUNDARY = (jint) env->GetObjectField(thiz, gId);
     BLUE_BOUNDARY = (jint) env->GetObjectField(thiz, bId);
-
+ 
+    
     //Update the values to java
     RED_BOUNDARY = 0;
     BLUE_BOUNDARY = -20;
@@ -110,8 +116,9 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNI
     env->SetIntField(thiz, rId, RED_BOUNDARY);
     env->SetIntField(thiz, gId, GREEN_BOUNDARY);
     env->SetIntField(thiz, bId, BLUE_BOUNDARY);
+    
 }
-
+*/
 /**************************************/
 
 
@@ -126,48 +133,17 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagReco
         return 0;
     }
 
-    cv::Mat img1 (data->src,false) , img2 (data->rImage,false) , img3 (data->bImage,false) , img4 (data->gImage,false); //NOT COPY OF IMAGE
-    std::string file1 = PATH + "filter_src.jpeg";
-    //cv::imwrite(file1,img1);
-    file1 = PATH + "filter_red.jpeg";
-    cv::imwrite(file1,img2);
-    file1 = PATH + "filter_green.jpeg";
-    cv::imwrite(file1,img4);
-    file1 =  PATH + "filter_blue.jpeg";
-    cv::imwrite(file1,img3);
-    
+    //looking for tags in the image
+    std::vector<std::string> tags = findTags(data);
 
-    //Convert IplImage to Mat
-    cv::Mat img (data->rImage,false); //NOT COPY OF IMAGE
-    cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
-    
-    //find squares on image
-    std::vector<Square> squares;
-    findSquares(img, squares);
-
-    //log
-    std::stringstream os;
-    os << "Square found before: " << squares.size() ;
-    
-    //remove squares inside others ones
-    filterSquares(squares);
-
-    //log
-    os << " later: " << squares.size() ;
-    LOGI(os.str().c_str());
-
-    //cut squares
-    std::vector<std::vector<cv::Mat> > subsquares;
-    cutSquares(data,squares,subsquares);
-
-    //recognize tag's in squares
-    decodeTags(subsquares);
-
-    //draw them
-    drawSquares(img_org, squares);
-    std::string file = PATH + "src_squares.jpeg";
-    cv::imwrite(file,img_org);
-    
+    //LOG
+    for ( int i=0 ; i<tags.size() ; i++ ) {
+        std::stringstream os;
+        os << tags[i];
+        if ( tags[i] == "12321113" )
+            os << "----> CHECKED";
+        LOGI(os.str().c_str());
+    }
 
     //release memory
     if (data->src)  cvReleaseImage(&data->src);
@@ -175,9 +151,7 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagReco
     if (data->gImage)cvReleaseImage(&data->gImage);
     if (data->bImage) cvReleaseImage(&data->bImage);
     delete data;
-  	
-    //return the image with the squares
-    //return getBmpImage(env,&img_org.operator IplImage());
+
     return 0;
 }
 
@@ -187,66 +161,74 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_JniWrapper_calibrate(
         JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
         jint height) 
 {
-    //load the image
-    Image_data* data = getIplImageFromIntArray(env, photo_data, width, height);
-    if (data == NULL) {
-        LOGE("Image data couldn't be loaded.");
-        return 0;
+    //Initialize values of boundaries
+    RED_BOUNDARY = BLUE_BOUNDARY = GREEN_BOUNDARY = 50;
+
+    bool exit_ = false;
+    bool calibrated = false;
+    int i = 0;
+
+    while (!exit_) {
+        //log
+        std::stringstream os;
+
+        //load the image
+        Image_data* data = getIplImageFromIntArray(env, photo_data, width, height);
+        if (data == NULL) {
+            LOGE("Image data couldn't be loaded.");
+            return 0;
+        }
+
+        //looking for tags in the image
+        std::vector<std::string> tags = findTags(data);
+
+        //check if found something
+        if ( !tags.empty() ) {
+            //log
+            os << "FOUND_";
+            //get the first one. Suppose to be only one
+            std::string tag = tags.front();
+            LOGI(tag.c_str());
+            //checked if it's correct
+            if (tag == TEMPLATE_TAG) {
+                calibrated = true;
+                exit_ = true;
+            }
+            else {
+                //adjust values of boundaries
+                adjustRGBBoundaries(tag,TEMPLATE_TAG);
+            }
+            
+        }else {
+            //log
+            os<<"NOT_FOUND_";
+            RED_BOUNDARY -= 5; //adjust to find red border
+        }
+
+        //log
+        os << "itr:" << i << " R: " << RED_BOUNDARY << " G: " << GREEN_BOUNDARY << " B: " << BLUE_BOUNDARY;
+        LOGI(os.str().c_str());
+        i++;
+        //condition of exit
+        if (RED_BOUNDARY < - 100 || BLUE_BOUNDARY < -100 || GREEN_BOUNDARY < -100 || i >= 10 ) {
+            exit_ = true;
+        } 
+
+        //release memory
+        if (data->src)  cvReleaseImage(&data->src);
+        if (data->rImage)  cvReleaseImage(&data->rImage);
+        if (data->gImage)cvReleaseImage(&data->gImage);
+        if (data->bImage) cvReleaseImage(&data->bImage);
+        delete data;
     }
 
-    cv::Mat img1 (data->src,false) , img2 (data->rImage,false) , img3 (data->bImage,false) , img4 (data->gImage,false); //NOT COPY OF IMAGE
-    std::string file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_src.jpeg";
-    //cv::imwrite(file1,img1);
-    file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_red.jpeg";
-    cv::imwrite(file1,img2);
-    file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_green.jpeg";
-    cv::imwrite(file1,img4);
-    file1 = "/mnt/sdcard/Pictures/MyCameraApp/filter_blue.jpeg";
-    cv::imwrite(file1,img3);
-    
-
-    //Convert IplImage to Mat
-    cv::Mat img (data->rImage,false); //NOT COPY OF IMAGE
-    cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
-    
-    //find squares on image
-    std::vector<Square> squares;
-    findSquares(img, squares);
-
-    //log
-    std::stringstream os;
-    os << "Square found before: " << squares.size() ;
-    
-    //remove squares inside others ones
-    filterSquares(squares);
-
-    //log
-    os << " later: " << squares.size() ;
-    LOGI(os.str().c_str());
-
-    //cut squares
-    std::vector<std::vector<cv::Mat> > subsquares;
-    cutSquares(data,squares,subsquares);
-
-    //recognize tag's in squares
-    decodeTags(subsquares);
-
-    //draw them
-    drawSquares(img_org, squares);
-    std::string file = "/mnt/sdcard/Pictures/MyCameraApp/src_squares.jpeg";
-    cv::imwrite(file,img_org);
-    
-
-    //release memory
-    if (data->src)  cvReleaseImage(&data->src);
-    if (data->rImage)  cvReleaseImage(&data->rImage);
-    if (data->gImage)cvReleaseImage(&data->gImage);
-    if (data->bImage) cvReleaseImage(&data->bImage);
-    delete data;
-    
-    //return the image with the squares
-    //return getBmpImage(env,&img_org.operator IplImage());
-    return 0;
+    /*
+    //Update the values founded to java
+    env->SetIntField(thiz, rId, RED_BOUNDARY);
+    env->SetIntField(thiz, gId, GREEN_BOUNDARY);
+    env->SetIntField(thiz, bId, BLUE_BOUNDARY);
+    */
+    return calibrated;
 }
 
 /**************************************/

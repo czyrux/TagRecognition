@@ -141,8 +141,8 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
             , img (src->src,false);
 
     //erode images
-    cv::erode(gImage, gImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
-    cv::erode(bImage, bImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
+    //cv::erode(gImage, gImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
+    //cv::erode(bImage, bImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
 
     subsquares.clear();
     for ( int i=0 ; i < sq.size() ; i++ ) 

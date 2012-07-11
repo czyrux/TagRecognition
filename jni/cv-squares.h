@@ -14,8 +14,8 @@ extern "C" {
 
 #define LIMIT_ROTATION 2 //degrees
 #define MIN_RECT_SIZE 20 //size in pixels
-#define WIDTH_BORDER 1/10.
-#define HEIGHT_BORDER 1/5.
+#define WIDTH_BORDER 1/9.5
+#define HEIGHT_BORDER 1/4.5
 
 /**************************************/
 

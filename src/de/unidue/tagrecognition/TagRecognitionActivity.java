@@ -44,6 +44,8 @@ public class TagRecognitionActivity extends Activity {
 	private Button _btn_calibrate;
 	private Button _btn_radar;
 	private Button _btn_help;
+	
+	private boolean _recognizerFunction;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -73,7 +75,12 @@ public class TagRecognitionActivity extends Activity {
 		_btn_radar.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
+				_recognizerFunction = true;
 				_btn_radar.setEnabled(false);
+				_btn_calibrate.setEnabled(false);
+				
+				//change icon
+				
 				_timer = new Timer();
 				_timer.schedule(new UpdateTimeTask(), 1000, 2000);
 			}
@@ -84,10 +91,17 @@ public class TagRecognitionActivity extends Activity {
 		_btn_calibrate.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// enable option buttons
+				//Call picture
+				_recognizerFunction = false;
 				_btn_calibrate.setEnabled(false);
-				_btn_radar.setEnabled(true);
-				//_jni.calibration();
+				_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
+					public void onAutoFocus(boolean success, Camera camera) {
+						camera.takePicture(null, null, jpegCallback);
+						_btn_calibrate.setEnabled(true);
+						_btn_radar.setEnabled(true);
+					}
+				});
+				
 			}
 		});
 
@@ -184,8 +198,12 @@ public class TagRecognitionActivity extends Activity {
 			/**
 			 * JNI ALGORITHM2 WORKING (complete program) FAST 840 ms SURF 4000ms
 			 */
-
-			Bitmap bmpExtract2 = _jni.tagRecognizer(bmpRotate);
+			//Select operation
+			Bitmap bmpExtract2 = null;
+			if ( _recognizerFunction == true )
+				bmpExtract2 = _jni.tagRecognizer(bmpRotate);
+			else
+				_jni.calibration(bmpRotate);
 			end = System.currentTimeMillis();
 			elapse = end - start;
 			Toast.makeText(TagRecognitionActivity.this,

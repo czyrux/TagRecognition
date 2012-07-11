@@ -2,8 +2,13 @@
 
 /**************************************/
 
-Image_data* loadPixelsFilter(int* pixels, int width, int height,
-								bool red_filter , bool green_filter , bool blue_filter) 
+int RED_BOUNDARY = 0;
+int BLUE_BOUNDARY = 0;
+int GREEN_BOUNDARY = 0;
+
+/**************************************/
+Image_data* loadPixelsFiltered(int* pixels, int width, int height,
+								bool red_filter , bool green_filter , bool blue_filter ) 
 {
 	IplImage *img = NULL, *img_red = NULL, *img_green = NULL, *img_blue= NULL;
 	uchar *base = NULL , *ptr = NULL, R , G , B ;
@@ -65,7 +70,7 @@ Image_data* loadPixelsFilter(int* pixels, int width, int height,
 }
 
 /**************************************/
-
+/*
 IplImage* loadPixels(int* pixels, int width, int height) {
 	int x, y;
 	IplImage *img = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
@@ -87,8 +92,7 @@ IplImage* loadPixels(int* pixels, int width, int height) {
 
 /**************************************/
 
-Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data,
-		jint width, jint height )
+Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data , int width, int height )
 {
 	int *pixels = env->GetIntArrayElements(array_data, 0);
 	if (pixels == NULL) {
@@ -96,7 +100,8 @@ Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data,
 		return 0;
 	}
 
-	Image_data* img = loadPixelsFilter(pixels, width, height,true,true,true);
+	//Digitalize image
+	Image_data* img = loadPixelsFiltered(pixels, width, height);
 	env->ReleaseIntArrayElements(array_data, pixels, 0);
 	if (img->src == NULL) {
 		LOGE("Error loading pixel array.");

@@ -96,8 +96,7 @@ obj/local/armeabi/objs/tagrecognizer-jni/cv-image.o: jni/cv-image.cpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/core/internal.hpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h \
  jni/cv-log.h \
- /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h \
- jni/cv-constants.h
+ /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h
 
 jni/cv-image.h:
 
@@ -294,5 +293,3 @@ jni/cv-image.h:
 jni/cv-log.h:
 
 /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h:
-
-jni/cv-constants.h:
