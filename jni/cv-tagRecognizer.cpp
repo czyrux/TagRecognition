@@ -162,12 +162,11 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_JniWrapper_calibrate(
         jint height) 
 {
     //Initialize values of boundaries
-    RED_BOUNDARY = BLUE_BOUNDARY = GREEN_BOUNDARY = 50;
+    RED_BOUNDARY = BLUE_BOUNDARY = GREEN_BOUNDARY = 0;
 
     bool exit_ = false;
     bool calibrated = false;
-    int i = 0;
-
+    int i=0;
     while (!exit_) {
         //log
         std::stringstream os;
@@ -202,15 +201,16 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_JniWrapper_calibrate(
         }else {
             //log
             os<<"NOT_FOUND_";
-            RED_BOUNDARY -= 5; //adjust to find red border
+            RED_BOUNDARY -= 10; //adjust to find red border
         }
 
         //log
-        os << "itr:" << i << " R: " << RED_BOUNDARY << " G: " << GREEN_BOUNDARY << " B: " << BLUE_BOUNDARY;
-        LOGI(os.str().c_str());
+        os << "itr: " << i << " | R: " << RED_BOUNDARY << " | G: " << GREEN_BOUNDARY << " | B: " << BLUE_BOUNDARY << " |";
         i++;
+        LOGI(os.str().c_str());
+
         //condition of exit
-        if (RED_BOUNDARY < - 100 || BLUE_BOUNDARY < -100 || GREEN_BOUNDARY < -100 || i >= 10 ) {
+        if (RED_BOUNDARY <= - 100 || BLUE_BOUNDARY <= -100 || GREEN_BOUNDARY <= -100 ) {
             exit_ = true;
         } 
 

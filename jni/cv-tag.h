@@ -6,7 +6,6 @@
 #include <cxcore.h>
 #include <opencv2/highgui/highgui.hpp>
 #include "cv-log.h"
-//#include "cv-constants.h"
 #include "cv-image.h"
 #include "cv-squares.h"
 

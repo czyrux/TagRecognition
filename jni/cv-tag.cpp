@@ -228,16 +228,25 @@ void adjustRGBBoundaries(std::string readed ,std::string original)
         if ( readed[i] != original[i] ) {   
             switch(original[i]) {
                 case '1':
-                    os << " fallo rojo";
+                    os << " fallo rojo"; 
                     r += desc; //it should have been red, but we didn't detect it
+                    //if we confused one color for another, up the color wrong
+                    /*if ( readed[i] == '2' ) b += -desc;
+                    if ( readed[i] == '3' ) g += -desc;*/
                     break;
                 case '2':
                     os << " fallo azul";
                     b += desc; //it should have been blue, but we didn't detect it
+                    //if we confused one color for another, up the color wrong
+                    if ( readed[i] == '1' ) r += -desc;
+                    if ( readed[i] == '3' ) g += -desc;
                     break;
                 case '3':
                     os << " fallo verde";
                     g += desc; //it should have been green, but we didn't detect it
+                    //if we confused one color for another, up the color wrong
+                    if ( readed[i] == '1' ) r += -desc;
+                    if ( readed[i] == '2' ) b += -desc;
                     break;
                 default:
                     break;
@@ -248,21 +257,18 @@ void adjustRGBBoundaries(std::string readed ,std::string original)
 
     //adjust incorrect values
     if (r) {
-        RED_BOUNDARY -= r;
-        LOGI("Ajuste red");
+        RED_BOUNDARY -= r * 5;
+        LOGI("Adjust red");
     }
     if (b) {
         BLUE_BOUNDARY -= b * 5;
-        LOGI("Ajuste blue");
+        LOGI("Adjust blue");
     } 
     if (g) {
         GREEN_BOUNDARY -= g * 5;
-        LOGI("Ajuste green");
+        LOGI("Adjust green");
     }
 
-    std::stringstream os1;
-    os1 << "dentro:" << " R: " << RED_BOUNDARY << " G: " << GREEN_BOUNDARY << " B: " << BLUE_BOUNDARY;
-    LOGI(os1.str().c_str());
 }
 
 /**************************************/

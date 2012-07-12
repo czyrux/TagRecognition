@@ -94,11 +94,10 @@ public class TagRecognitionActivity extends Activity {
 				//Call picture
 				_recognizerFunction = false;
 				_btn_calibrate.setEnabled(false);
+				_btn_radar.setEnabled(false);
 				_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
 					public void onAutoFocus(boolean success, Camera camera) {
 						camera.takePicture(null, null, jpegCallback);
-						_btn_calibrate.setEnabled(true);
-						_btn_radar.setEnabled(true);
 					}
 				});
 				
@@ -184,13 +183,13 @@ public class TagRecognitionActivity extends Activity {
 					options);
 
 			// Rotate the image to 90
-			Matrix mtx = new Matrix();
+			/*Matrix mtx = new Matrix();
 			mtx.postRotate(90);
 
 			// Rotating Bitmap
 			Bitmap bmpRotate = Bitmap.createBitmap(bmp, 0, 0, bmp.getWidth(),
 					bmp.getHeight(), mtx, true);
-
+			*/
 			// Filter image
 			// 208 ms jni
 			// 1700 ms java
@@ -201,13 +200,14 @@ public class TagRecognitionActivity extends Activity {
 			//Select operation
 			Bitmap bmpExtract2 = null;
 			if ( _recognizerFunction == true )
-				bmpExtract2 = _jni.tagRecognizer(bmpRotate);
+				bmpExtract2 = _jni.tagRecognizer(bmp);
 			else
-				_jni.calibration(bmpRotate);
+				_jni.calibration(bmp,_btn_radar);
+			
 			end = System.currentTimeMillis();
 			elapse = end - start;
 			Toast.makeText(TagRecognitionActivity.this,
-					"" + elapse + " ms is used to extract features.",
+					"" + elapse + " ms is used to do the operation.",
 					Toast.LENGTH_LONG).show();
 			Log.d(NAME, elapse.toString() + " ms");
 

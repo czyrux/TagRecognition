@@ -3,6 +3,7 @@ package de.unidue.tagrecognition;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.widget.Button;
 
 public class JniWrapper {
 	// load the library - name matches jni/Android.mk
@@ -47,7 +48,7 @@ public class JniWrapper {
 		return bmp;
 	}
 
-	public void calibration(Bitmap bitmap) {
+	public void calibration(Bitmap bitmap , Button b1 ) {
 		// prepare bitmap
 		int width = bitmap.getWidth();
 		int height = bitmap.getHeight();
@@ -56,7 +57,10 @@ public class JniWrapper {
 		
 		//call jni method
 		boolean realize = calibrate(pixels, width, height);
-		Log.d("VALORES AJUSTADOS", "R:" + _RED_BOUNDARY + " G:" + _GREEN_BOUNDARY
-				+ " B:" + _BLUE_BOUNDARY);		
+		//Log.d("VALORES AJUSTADOS", "R:" + _RED_BOUNDARY + " G:" + _GREEN_BOUNDARY + " B:" + _BLUE_BOUNDARY);
+		Log.d("AJUSTE",""+realize);
+		
+		//Enable button passed
+		b1.setEnabled(true);		
 	}
 }
