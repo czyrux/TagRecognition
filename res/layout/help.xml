@@ -1,71 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:id="@+id/help_layout"
-              android:orientation="vertical"
-              android:layout_width="fill_parent"
-              android:layout_height="fill_parent"
-              android:padding="10dp"
-              android:background="@android:color/darker_gray" >
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/help_layout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:id="@+id/container"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal" >
+        android:background="@android:color/darker_gray"
+        android:orientation="vertical"
+        android:padding="10dp" >
 
-        <ImageView 
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:src="@raw/radar38"
-            />
-        
         <TextView
-            android:id="@+id/TextView01"
+            android:id="@+id/TextView_radar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:drawableLeft="@raw/radar38"
+            android:drawablePadding="10dp"
             android:text="@string/btn_radar_description"
-            android:textColor="#FFF" 
-            android:paddingLeft="10dp" />
+            android:textColor="#FFF" />
+
+        <TextView
+            android:id="@+id/TextView_calibrate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@raw/calibrate32"
+            android:drawablePadding="12dp"
+            android:paddingLeft="2dp"
+            android:paddingTop="5dp"
+            android:text="@string/btn_calibrate_description"
+            android:textColor="#FFF" />
+
+        <TextView
+            android:id="@+id/TextView_info"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@raw/help38"
+            android:drawablePadding="10dp"
+            android:paddingTop="5dp"
+            android:text="@string/btn_info_description"
+            android:textColor="#FFF" />
     </LinearLayout>
 
-    <LinearLayout
-              android:orientation="horizontal"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:paddingTop="5dp"
-              android:paddingLeft="3dp"
-              >
-        <ImageView 
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:src="@raw/calibrate32"
-            />
-    	<TextView android:id="@+id/text"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:textColor="#FFF"
-              android:paddingLeft="12dp"
-              android:text="@string/btn_calibrate_description"
-              />
-    </LinearLayout>
-    
-    <LinearLayout
-              android:orientation="horizontal"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:paddingTop="5dp"
-              >
-        <ImageView 
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:src="@raw/help38"
-            />
-    	<TextView android:id="@+id/text"
-              android:layout_width="wrap_content"
-              android:layout_height="wrap_content"
-              android:textColor="#FFF"
-              android:paddingLeft="10dp"
-              android:text="@string/btn_info_description"
-              />
-    </LinearLayout>
-    
-</LinearLayout>
+</ScrollView>
