@@ -2,9 +2,9 @@
 
 /**************************************/
 
-int RED_BOUNDARY = 0;
-int BLUE_BOUNDARY = 0;
-int GREEN_BOUNDARY = 0;
+int RED_BOUNDARY = -10;
+int BLUE_BOUNDARY = -20;
+int GREEN_BOUNDARY = -60;
 
 /**************************************/
 Image_data* loadPixelsFiltered(int* pixels, int width, int height,

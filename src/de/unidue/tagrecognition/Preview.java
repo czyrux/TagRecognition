@@ -6,7 +6,6 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
-import android.hardware.Camera.Size;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -77,6 +76,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	}
 
 	// Get optimal size for preview
+	/*
 	private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
 		final double ASPECT_TOLERANCE = 0.05;
 		double targetRatio = (double) w / h;
@@ -111,7 +111,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		return optimalSize;
 	}
-
+	*/
 	// Called when holder has changed
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
 		// stop preview before making changes-- Disable for problems with
@@ -121,6 +121,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		 * "Error stopping camera preview: " + e.getMessage()); }
 		 */
 
+		/*
 		Camera.Parameters parameters = mCamera.getParameters();
 		// set preview size and make any resize, rotate or
 		// reformatting changes here
@@ -131,6 +132,8 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		// start preview with new settings
 		mCamera.setParameters(parameters);
 		mCamera.startPreview();
+		*/
+		
 	}
 
 	public void release() {

@@ -18,7 +18,8 @@ std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& s
 /**************************************/
 
 bool checkPoint ( const cv::Mat& image , int y , int x , uchar colour ) {
-    //return (image.at<uchar>(y, x) == colour );  
+    //return (image.at<uchar>(y, x) == colour );
+    //if ( y < image.rows && x < image.cols )  
     for ( int i=-1 ; i<1 ; i++ )
         for ( int j=-1 ; j<1 ; j++ )
             if ( image.at<uchar>(y+i, x+j) == colour )
@@ -28,14 +29,14 @@ bool checkPoint ( const cv::Mat& image , int y , int x , uchar colour ) {
 
 /**************************************/
 
-//USA LA GRANDE TAMB
 std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
 	std::string tag;
 	LOGI("DECODING...");
+
     //Matrix's for the three spaces of colour
 	cv::Mat rImage = subsquares[0] , gImage = subsquares[1] , bImage = subsquares[2] ,
     img = subsquares[3];
-	
+	LOGI("decodeTag: assignation of images done");
 	//CONSTANT FOR TAGS
 	int cols = COLS , rows = ROWS;
 
@@ -45,12 +46,19 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
 
 	//Value of increment for the index
 	int incWidth = rImage.cols/cols , incHeight = rImage.rows/rows ;
+    //int inc = std::min(incWidth,incHeight);
+    //incHeight = incWidth = std::min(incWidth,incHeight);
+    /*
+    std::stringstream os3;
+    os3 << "incrementos W: " << incWidth << " H:" << incHeight;
+    LOGI(os3.str().c_str());
+    */
 
     //y height-rows , x width-cols
     //Check the tag
     std::vector<std::vector<int> > v;
     v.resize(rows);
-	for( int i = 0, y = incHeight/2; y < rImage.rows; y += incHeight , i++ )
+	for( int i = 0, y = incHeight/2 /*incHeight*/; y < rImage.rows; y += incHeight , i++ )
 	{
 		v[i].resize(cols);
     	for( int j = 0 , x = incWidth/2; x < rImage.cols; x += incWidth , j++ )
@@ -72,7 +80,8 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index) {
         		v[i][j] = DEFAULT_VALUE;
 
         	cv::Point p(x,y); //(x,y)
-            cv::circle(img, p , 1, cv::Scalar(0,255,255),1,CV_AA);
+            if (x<rImage.cols && y<rImage.rows)
+                cv::circle(img, p , 1, cv::Scalar(0,255,255),1,CV_AA);
         	//cv::circle(rImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
         	//cv::circle(gImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
 			//cv::circle(bImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
@@ -158,9 +167,9 @@ void orientedTag ( std::vector<std::vector<int> > &v ) {
 
 /**************************************/
 
-std::vector<std::string> findTags (const Image_data* data) 
+std::vector<Tag> findTags (const Image_data* data) 
 {
-    std::vector<std::string> tags;
+    std::vector<Tag> tags;
     tags.clear();
     
     cv::Mat img1 (data->src,false) , img2 (data->rImage,false) , img3 (data->bImage,false) , img4 (data->gImage,false); //NOT COPY OF IMAGE
@@ -197,8 +206,17 @@ std::vector<std::string> findTags (const Image_data* data)
     std::vector<std::vector<cv::Mat> > subsquares;
     cutSquares(data,squares,subsquares);
 
-    //recognize tag's in squares
-    tags = decodeTags(subsquares);
+    //recognize tag's codes in squares
+    std::vector<std::string> codes = decodeTags(subsquares);
+
+    //build tags
+    Tag aux;
+    for ( int i=0 ; i<codes.size() ; i++ ) {
+        aux.x = squares[i].rect.center.x;
+        aux.y = squares[i].rect.center.y;
+        aux.code = codes[i];
+        tags.push_back(aux);
+    }
 
     //draw the squares founded and store them
     drawSquares(img_org, squares);
@@ -238,15 +256,15 @@ void adjustRGBBoundaries(std::string readed ,std::string original)
                     os << " fallo azul";
                     b += desc; //it should have been blue, but we didn't detect it
                     //if we confused one color for another, up the color wrong
-                    if ( readed[i] == '1' ) r += -desc;
-                    if ( readed[i] == '3' ) g += -desc;
+                    //if ( readed[i] == '1' ) r += -desc;
+                    //if ( readed[i] == '3' ) g += -desc;
                     break;
                 case '3':
                     os << " fallo verde";
                     g += desc; //it should have been green, but we didn't detect it
                     //if we confused one color for another, up the color wrong
-                    if ( readed[i] == '1' ) r += -desc;
-                    if ( readed[i] == '2' ) b += -desc;
+                    if ( readed[i] == '1' ) r -= desc;
+                    if ( readed[i] == '2' ) b -= desc;
                     break;
                 default:
                     break;
@@ -265,7 +283,7 @@ void adjustRGBBoundaries(std::string readed ,std::string original)
         LOGI("Adjust blue");
     } 
     if (g) {
-        GREEN_BOUNDARY -= g * 5;
+        GREEN_BOUNDARY -= g * 7;
         LOGI("Adjust green");
     }
 

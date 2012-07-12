@@ -18,7 +18,6 @@ import android.os.Bundle;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.os.Environment;
@@ -76,16 +75,17 @@ public class TagRecognitionActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				_recognizerFunction = true;
-				_btn_radar.setEnabled(false);
-				_btn_calibrate.setEnabled(false);
+				//_btn_radar.setEnabled(false);
+				//_btn_calibrate.setEnabled(false);
 				
 				//change icon
-				
+				i = 0;
 				_timer = new Timer();
 				_timer.schedule(new UpdateTimeTask(), 1000, 2000);
+				
 			}
 		});
-		_btn_radar.setEnabled(false);
+		_btn_radar.setEnabled(true);
 
 		// actions for calibrate button
 		_btn_calibrate.setOnClickListener(new View.OnClickListener() {
@@ -96,11 +96,10 @@ public class TagRecognitionActivity extends Activity {
 				_btn_calibrate.setEnabled(false);
 				_btn_radar.setEnabled(false);
 				_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
-					public void onAutoFocus(boolean success, Camera camera) {
+					public synchronized void onAutoFocus(boolean success, Camera camera) {
 						camera.takePicture(null, null, jpegCallback);
 					}
 				});
-				
 			}
 		});
 
@@ -153,23 +152,22 @@ public class TagRecognitionActivity extends Activity {
 
 	// for the temporal calling to task
 	int i = 0;
-
 	class UpdateTimeTask extends TimerTask {//
 		public void run() {
-			if (i < 1) {
+			if (i < 2) {
 				Log.d(NAME, "taken foto " + i);
-				_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
-					public void onAutoFocus(boolean success, Camera camera) {
+				_mPreview.mCamera.autoFocus( new Camera.AutoFocusCallback() {
+					public synchronized void onAutoFocus(boolean success, Camera camera) {
 						camera.takePicture(null, null, jpegCallback);
-						_btn_radar.setEnabled(true);
 					}
 				});
+				
 			} else
 				cleanTimer();
 			i++;
 		}
 	}
-
+		
 	// Handles data for jpeg picture
 	private PictureCallback jpegCallback = new PictureCallback() {
 		@Override
@@ -198,10 +196,11 @@ public class TagRecognitionActivity extends Activity {
 			 * JNI ALGORITHM2 WORKING (complete program) FAST 840 ms SURF 4000ms
 			 */
 			//Select operation
-			Bitmap bmpExtract2 = null;
-			if ( _recognizerFunction == true )
-				bmpExtract2 = _jni.tagRecognizer(bmp);
-			else
+			String tags;
+			if ( _recognizerFunction == true ) {
+				tags = _jni.tagRecognizer(bmp);
+				Log.d(NAME, "Tags received: " + tags );
+			} else
 				_jni.calibration(bmp,_btn_radar);
 			
 			end = System.currentTimeMillis();
@@ -217,8 +216,6 @@ public class TagRecognitionActivity extends Activity {
 
 			// Store the image
 			//storeBitmap(bmpRotate, "IMG_0_");
-			if (bmpExtract2 != null)
-				storeBitmap(bmpExtract2, "IMG_1_");
 
 			// Continue with the preview
 			_mPreview.mCamera.startPreview();

@@ -21,7 +21,13 @@
 extern "C" {
 #endif
 
-std::vector<std::string> findTags ( const Image_data* data ); 
+struct Tag {
+	int x;
+	int y;
+	std::string code;
+};
+
+std::vector<Tag> findTags ( const Image_data* data ); 
 
 std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& subsquares ) ;
 

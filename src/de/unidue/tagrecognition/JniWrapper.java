@@ -12,7 +12,7 @@ public class JniWrapper {
 	}
 
 	// native functions
-	private native byte[] tagRecognizer(int[] pixels, int width, int height);
+	private native String tagRecognizer(int[] pixels, int width, int height);
 
 	private native boolean calibrate(int[] pixels, int width, int height);
 
@@ -31,7 +31,7 @@ public class JniWrapper {
 		//nativeSetup();
 	}
 
-	public Bitmap tagRecognizer(Bitmap bitmap) {
+	public String tagRecognizer(Bitmap bitmap) {
 		// prepare bitmap
 		int width = bitmap.getWidth();
 		int height = bitmap.getHeight();
@@ -39,13 +39,16 @@ public class JniWrapper {
 		bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
 		
 		// call method jni
-		byte[] imageData = this.tagRecognizer(pixels, width, height);
+		//byte[] imageData = 
+		String tags = this.tagRecognizer(pixels, width, height);
 
 		// prepare the data returned
+		/*
 		Bitmap bmp = null;
 		if (imageData != null)
 			bmp = BitmapFactory.decodeByteArray(imageData, 0, imageData.length);
-		return bmp;
+		return bmp;*/
+		return tags;
 	}
 
 	public void calibration(Bitmap bitmap , Button b1 ) {

@@ -11,7 +11,6 @@
 #include "cv-squares.h"
 #include "cv-tag.h"
 #include "cv-log.h"
-//#include "cv-constants.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -122,7 +121,7 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNI
 /**************************************/
 
 
-JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagRecognizer(
+JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagRecognizer(
 		JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
 		jint height) 
 {
@@ -134,16 +133,26 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagReco
     }
 
     //looking for tags in the image
-    std::vector<std::string> tags = findTags(data);
+    std::vector<Tag> tags = findTags(data);
 
     //LOG
     for ( int i=0 ; i<tags.size() ; i++ ) {
         std::stringstream os;
-        os << tags[i];
-        if ( tags[i] == "12321113" )
+        os << "x: " << tags[i].x << " y:" << tags[i].y << " code:" << tags[i].code;
+        if ( tags[i].code == "12321113" )
             os << "----> CHECKED";
         LOGI(os.str().c_str());
     }
+
+    //Build string to return to java
+    std::stringstream stream;
+    for ( int i=0 ; i<tags.size() ; i++ ) {
+        stream << tags[i].x << "|" << tags[i].y << "|" << tags[i].code;
+        if ( i< tags.size()-1)
+            stream << "&";
+    }
+
+    //LOGI(stream.str().c_str());
 
     //release memory
     if (data->src)  cvReleaseImage(&data->src);
@@ -152,7 +161,9 @@ JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagReco
     if (data->bImage) cvReleaseImage(&data->bImage);
     delete data;
 
-    return 0;
+
+    //return NewStringUTF(env, (const jchar*)stream.str().c_str());
+    return env->NewStringUTF((char*)stream.str().c_str());
 }
 
 /**************************************/
@@ -179,14 +190,14 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_JniWrapper_calibrate(
         }
 
         //looking for tags in the image
-        std::vector<std::string> tags = findTags(data);
+        std::vector<Tag> tags = findTags(data);
 
         //check if found something
         if ( !tags.empty() ) {
             //log
             os << "FOUND_";
             //get the first one. Suppose to be only one
-            std::string tag = tags.front();
+            std::string tag = tags.front().code;
             LOGI(tag.c_str());
             //checked if it's correct
             if (tag == TEMPLATE_TAG) {
