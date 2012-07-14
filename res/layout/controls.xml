@@ -38,5 +38,16 @@
         android:contentDescription="@string/btn_info_description"
         android:text="@string/btn_help_label"
         style="@style/btn_style"/>
+    
+    <Button
+        android:id="@+id/stop_action"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentBottom="true"
+        android:drawableTop="@drawable/help_button" 
+        android:contentDescription="@string/btn_info_description"
+        android:text="@string/btn_stop_label"
+        style="@style/btn_style"/>
 
 </RelativeLayout>

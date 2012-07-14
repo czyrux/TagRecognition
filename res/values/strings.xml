@@ -4,6 +4,7 @@
     <string name="btn_calibrate_label">Calibrate</string>
     <string name="btn_radar_label">Search tags</string>
     <string name="btn_help_label"></string>
+    <string name="btn_stop_label">Stop search</string>
     <string name="btn_radar_description">Search tags using the camera and send the result founded to the server. Previous calibration mandatory.</string>
     <string name="btn_info_description">Help menu</string>
     <string name="btn_calibrate_description">Calibrate the boundaries of R, G and B, in order, to detect this colors in the image. Used a template tag to calibrate. This template must be alone (without any other tag)</string>
