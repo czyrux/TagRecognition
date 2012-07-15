@@ -2,6 +2,8 @@
 
 /**************************************/
 
+//Extract the data from the points of square and return the
+//Square structure asociated to the points.
 Square extractSquareData (const std::vector<cv::Point> &p) 
 {
     Square sq;
@@ -20,9 +22,7 @@ Square extractSquareData (const std::vector<cv::Point> &p)
 
 /**************************************/
 
-// helper function:
-// finds a cosine of angle between vectors
-// from pt0->pt1 and from pt0->pt2
+// finds a cosine of angle between vectors from pt0->pt1 and from pt0->pt2
 double angle( cv::Point pt1, cv::Point pt2, cv::Point pt0 )
 {
     double dx1 = pt1.x - pt0.x;
@@ -34,15 +34,13 @@ double angle( cv::Point pt1, cv::Point pt2, cv::Point pt0 )
 
 /**************************************/
 
-// returns sequence of squares detected on the image.
-// the sequence is stored in the specified memory storage
-void findSquares( const cv::Mat& image, std::vector<Square>& squares )
+//find squares on image
+std::vector<Square> findSquares( const cv::Mat& image )
 {
+    std::vector<Square> squares;
     squares.clear();
     cv::Mat gray = image.clone();
     std::vector<std::vector<cv::Point> > contours;
-
-    //cv::cvtColor( image, gray, CV_BGR2GRAY );
 
     //MAS LENTO Y HACE QUE SE COJAN CUADRADOS EXTERNOS
     //erote the image to fill holes 
@@ -63,8 +61,7 @@ void findSquares( const cv::Mat& image, std::vector<Square>& squares )
     // find contours and store them all as a list
     cv::findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-    std::vector<cv::Point> approx;
-            
+    std::vector<cv::Point> approx;     
     // test each contour
     for( size_t i = 0; i < contours.size(); i++ )
     {
@@ -97,11 +94,13 @@ void findSquares( const cv::Mat& image, std::vector<Square>& squares )
             }
          }
     }
+
+    return squares;
 }
 
 /**************************************/
 
-// the function draws all the squares in the image
+// draws all the squares in the image
 void drawSquares( cv::Mat& image, const std::vector<Square>& squares )
 {
     cv::Point po;
@@ -119,7 +118,9 @@ void drawSquares( cv::Mat& image, const std::vector<Square>& squares )
 
 /**************************************/
 
-void removeBorder ( cv::Mat & img ) {
+//Remove border from squares
+void removeBorder ( cv::Mat & img ) 
+{
     int w , h;
     if (img.cols > img.rows ) {
         w = img.cols * WIDTH_BORDER;
@@ -132,10 +133,15 @@ void removeBorder ( cv::Mat & img ) {
     img = img( cv::Rect(w, h, (img.cols-w*2) , (img.rows-h*2)) );
 }
 
-//INCLUYE CORTE DENTRO DE LA BUENA
-void cutSquares(const Image_data* src, const std::vector<Square>& sq , 
-                std::vector<std::vector<cv::Mat> >& subsquares)
+/**************************************/
+
+//Create a array of subsquares (Mat) from each square.
+std::vector<std::vector<cv::Mat> > cutSquares(const Image_data* src, const std::vector<Square>& sq )
 {    
+    //Array to hold the solution
+    std::vector<std::vector<cv::Mat> > subsquares;
+    subsquares.clear();
+
     //Matrix's to extract the subsquares
     cv::Mat rImage (src->rImage,false) , gImage (src->gImage,false) , bImage (src->bImage,false)
             , img (src->src,false);
@@ -144,7 +150,7 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
     //cv::erode(gImage, gImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
     //cv::erode(bImage, bImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
 
-    subsquares.clear();
+    //Cut the squares
     for ( int i=0 ; i < sq.size() ; i++ ) 
     {
         //Submatrix to fill
@@ -220,6 +226,8 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
             cv::imwrite(file,subsquares[i][j]);
         }*/        
     }
+
+    return subsquares;
 }
 
 /**************************************/
@@ -227,11 +235,11 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
 //check if the squares b is inside the square a
 inline bool inside (const Square &a , const Square &b ) {
     return (a.frame & b.frame) == b.frame; //if the intersection between both is b
-    /*cv::Point p1 (b.frame.x,b.frame.y) , p2 (b.frame.x+b.frame.width,b.frame.y+b.frame.height);
-    return a.frame.contains(p1) && a.frame.contains(p2);*/
 }
 
-// the function draws all the squares in the image
+/**************************************/
+
+//remove squares that are inside others
 void filterSquares ( std::vector<Square>& squares )
 {
     std::vector<Square> sol;

@@ -6,7 +6,6 @@
 #include <cv.h>
 #include <cxcore.h>
 #include "cv-log.h"
-//#include "cv-constants.h"
 
 #ifdef __cplusplus
 extern "C" {

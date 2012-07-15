@@ -201,8 +201,7 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
     cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
     
     //find squares on image
-    std::vector<Square> squares;
-    findSquares(img, squares);
+    std::vector<Square> squares = findSquares(img);
 
     //log
     std::stringstream os;
@@ -220,8 +219,7 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
     }
 
     //cut squares
-    std::vector<std::vector<cv::Mat> > subsquares;
-    cutSquares(data,squares,subsquares);
+    std::vector<std::vector<cv::Mat> > subsquares = cutSquares(data,squares);
 
     //recognize tag's codes in squares
     std::vector<std::string> codes = decodeTags(subsquares , oriented );
