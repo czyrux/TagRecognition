@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -228,30 +231,26 @@ public class TagRecognitionActivity extends Activity {
 				}
 			}
 			
-
 			Long start, end, elapse;
 			start = System.currentTimeMillis();
 
 			// Read the stream of data
 			BitmapFactory.Options options = new BitmapFactory.Options();
 			options.inSampleSize = 4; // make the picture 1/4 of size
-			// options.inSampleSize = 1;
+			//options.inSampleSize = 2;
 			Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length,
 					options);
 
-			// Rotate the image to 90
-			/*
+			/* Rotate the image to 90
 			 * Matrix mtx = new Matrix(); mtx.postRotate(90);
-			 * 
-			 * // Rotating Bitmap Bitmap bmpRotate = Bitmap.createBitmap(bmp, 0,
-			 * 0, bmp.getWidth(), bmp.getHeight(), mtx, true);
+			 * Rotating Bitmap Bitmap bmpRotate = Bitmap.createBitmap(bmp, 0,0, bmp.getWidth(), bmp.getHeight(), mtx, true);
 			 */
 
 			// Select operation
 			String tags;
 			if (_recognizerFunction == true) {
 				tags = _jni.tagRecognizer(bmp);
-				Log.d(TAG, "Tags received: " + tags);
+				processTags(tags);
 				_btn_calibrate.setEnabled(true);
 			} else {
 				_jni.calibration(bmp);
@@ -269,13 +268,9 @@ public class TagRecognitionActivity extends Activity {
 			// WITH ROTATE OUTSIDE = 800 MS
 			// SIN ROTATE 600 MS
 			// WITH ROTATE INSIDE = 800ms
-
 			// Filter image
 			// 208 ms jni
 			// 1700 ms java
-
-			// Store the image
-			// storeBitmap(bmpRotate, "IMG_0_");
 
 			// Continue with the preview
 			_mPreview.mCamera.startPreview();
@@ -286,6 +281,70 @@ public class TagRecognitionActivity extends Activity {
 			}
 		}
 	};
+	
+	private void processTags( String tagsinfo ){
+		//Store the tags founded
+		ArrayList<Tag> tags = new ArrayList<Tag>();
+		//Get current time
+		Date time = new Date();
+		
+		//Prepare tags
+		if ( tagsinfo.length() > 0 ) 
+		{
+			Log.d(TAG, "Stream received:" + tagsinfo +".");
+			//Split by token &
+			String [] taginfo = tagsinfo.split("&");
+			Log.d(TAG, "N¼ of tags: " + taginfo.length);
+			//Create tags
+			for ( int i=0 ; i<taginfo.length ; i++ ){
+				try {
+					String[] decompressTag = taginfo[i].split("/");
+					tags.add(new Tag(Integer.parseInt(decompressTag[0]),
+							Integer.parseInt(decompressTag[1]),
+							decompressTag[2],time));
+					
+					//two times the same tag
+					tags.add(new Tag(Integer.parseInt(decompressTag[0]),
+							Integer.parseInt(decompressTag[1]),
+							decompressTag[2],time));
+				}
+				catch ( Exception e){
+					Log.e(TAG, "Format error reading a Tag");
+				}
+			}
+
+		}else{
+			tags.add(new Tag(-1,-1,"",time));
+			Log.d(TAG, "No tags founded");
+		}
+		
+		//Send by net
+		SenderData net = null;
+		try {
+			net = new SenderData();
+		} catch (UnknownHostException e) {
+			Log.d(TAG, "Server not found");
+			e.printStackTrace();
+		} catch (IOException e) {
+			Log.d(TAG, "Problems open streams");
+			e.printStackTrace();
+		} catch ( Exception e){
+			Log.d(TAG,"Unkowns exception opening socket");
+			e.printStackTrace();
+		}
+		
+		if ( net != null ) {
+			try {
+				net.sendData(tags);
+			} catch (IOException e) {
+				Log.d(TAG, "Error sending tags");
+				e.printStackTrace();
+			}
+			net.closeConnection();	
+		}
+				
+		
+	}
 
 	// Save Bitmap
 	/*

@@ -147,7 +147,7 @@ JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagRecognizer
     //Build string to return to java
     std::stringstream stream;
     for ( int i=0 ; i<tags.size() ; i++ ) {
-        stream << tags[i].x << "|" << tags[i].y << "|" << tags[i].code;
+        stream << tags[i].x << "/" << tags[i].y << "/" << tags[i].code;
         if ( i< tags.size()-1)
             stream << "&";
     }
@@ -190,7 +190,7 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_JniWrapper_calibrate(
         }
 
         //looking for tags in the image
-        std::vector<Tag> tags = findTags(data);
+        std::vector<Tag> tags = findTags(data,true);//true means that the tags are already oriented
 
         //check if found something
         if ( !tags.empty() ) {
@@ -213,6 +213,7 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_JniWrapper_calibrate(
             //log
             os<<"NOT_FOUND_";
             RED_BOUNDARY -= 10; //adjust to find red border
+            BLUE_BOUNDARY -= 5; //or to find the blue square
         }
 
         //log

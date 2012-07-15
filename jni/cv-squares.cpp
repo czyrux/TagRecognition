@@ -164,8 +164,8 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
         }
 
         //log
-        std::stringstream os;
-        os << "Square : " << i << " --->alpha:"<< angle;
+        //std::stringstream os;
+        //os << "Square : " << i << " --->alpha:"<< angle;
 
         //rotation
         if ( std::abs(angle) > LIMIT_ROTATION ) {
@@ -185,7 +185,7 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
             cv::getRectSubPix(rotatedB, box_size, sq[i].rect.center, subimg_blue);
             cv::getRectSubPix(rotated, box_size, sq[i].rect.center, subimg);
             
-            os << "_rotated";
+            //os << "_rotated";
         }
         else {//just cut it
             subimg_red   = rImage(sq[i].frame);
@@ -209,7 +209,7 @@ void cutSquares(const Image_data* src, const std::vector<Square>& sq ,
         subsquares.push_back(aux);
         
         //log
-        LOGI(os.str().c_str());
+        //LOGI(os.str().c_str());
         
         //Write image
         /*std::stringstream os1;

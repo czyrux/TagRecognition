@@ -12,7 +12,7 @@ include $(OPENCV_CONFIG)
 # Here we give our module name and source file(s)
 LOCAL_MODULE    := tagrecognizer-jni
 LOCAL_SRC_FILES := cv-image.cpp cv-squares.cpp cv-tagRecognizer.cpp cv-tag.cpp
-
+APP_OPTIM := release
 LOCAL_LDLIBS +=  -llog -ldl
 
 include $(BUILD_SHARED_LIBRARY)

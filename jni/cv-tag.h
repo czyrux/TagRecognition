@@ -17,6 +17,8 @@
 #define GREEN_VALUE 3
 #define DEFAULT_VALUE 0
 
+#define DEBUG_TAG true
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -27,11 +29,13 @@ struct Tag {
 	std::string code;
 };
 
-std::vector<Tag> findTags ( const Image_data* data ); 
+std::vector<Tag> findTags ( const Image_data* data , bool oriented=false); 
 
-std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& subsquares ) ;
+std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& subsquares , bool oriented=false ) ;
 
-std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index ) ;  
+std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index , bool oriented=false ) ;  
+
+inline bool validTag (std::string tag );
 
 void orientedTag ( std::vector<std::vector<int> > &v );
 
