@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
@@ -11,11 +12,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutionException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import android.graphics.Bitmap;
@@ -41,6 +44,7 @@ public class TagRecognitionActivity extends Activity {
 	private Timer _timer;
 	private JniWrapper _jni;
 	private AlertDialog _helpMenu;
+	private NetworkTask _server;
 
 	private Button _btn_calibrate;
 	private Button _btn_radar;
@@ -51,6 +55,7 @@ public class TagRecognitionActivity extends Activity {
 	private Boolean _isAlive; //used to check if the program is still alive 
 	private Boolean _working; //used to check if one thread is making a picture
 	private boolean _timerOn; //used to check if the timer was activated
+	private boolean _serverOn;
 
 	/** Called when the activity is first created. */
 	@Override
@@ -139,6 +144,9 @@ public class TagRecognitionActivity extends Activity {
 		});
 		_btn_stop.setEnabled(false);
 
+		//start server
+		_server = new NetworkTask();
+		_server.execute();
 	}
 
 	// Create the alert dialog with the help menu
@@ -282,6 +290,7 @@ public class TagRecognitionActivity extends Activity {
 		}
 	};
 	
+	@SuppressWarnings("unchecked")
 	private void processTags( String tagsinfo ){
 		//Store the tags founded
 		ArrayList<Tag> tags = new ArrayList<Tag>();
@@ -315,35 +324,27 @@ public class TagRecognitionActivity extends Activity {
 
 		}else{
 			tags.add(new Tag(-1,-1,"",time));
+			tags.add(new Tag(-1,-1,"",time));
 			Log.d(TAG, "No tags founded");
 		}
 		
 		//Send by net
-		SenderData net = null;
+		SenderTags net = new SenderTags();
+		net.execute(tags);
 		try {
-			net = new SenderData();
-		} catch (UnknownHostException e) {
-			Log.d(TAG, "Server not found");
-			e.printStackTrace();
-		} catch (IOException e) {
-			Log.d(TAG, "Problems open streams");
-			e.printStackTrace();
-		} catch ( Exception e){
-			Log.d(TAG,"Unkowns exception opening socket");
-			e.printStackTrace();
-		}
-		
-		if ( net != null ) {
-			try {
-				net.sendData(tags);
-			} catch (IOException e) {
-				Log.d(TAG, "Error sending tags");
-				e.printStackTrace();
+			boolean success = net.get();
+			if (success) {
+				Toast.makeText(TagRecognitionActivity.this,"Tags sendt.",
+						Toast.LENGTH_SHORT).show();
+			}else {
+				Toast.makeText(TagRecognitionActivity.this,"Tags couldn't been sent.",
+						Toast.LENGTH_SHORT).show();
 			}
-			net.closeConnection();	
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
 		}
-				
-		
 	}
 
 	// Save Bitmap
@@ -428,6 +429,10 @@ public class TagRecognitionActivity extends Activity {
 		_mPreview.release();
 		cleanTimer();
 
+		if (_server!=null) {
+			_server.closeServer();
+		}
+		
 		super.onPause();
 	}
 	
@@ -436,7 +441,7 @@ public class TagRecognitionActivity extends Activity {
 		super.onDestroy();
 		if (_helpMenu != null) {
 			_helpMenu.cancel();
-		}
+		}		
 	}
 
 }

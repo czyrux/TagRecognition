@@ -7,14 +7,11 @@
 Square extractSquareData (const std::vector<cv::Point> &p) 
 {
     Square sq;
-
     //Take the real dimensions of square
     sq.rect = cv::minAreaRect(cv::Mat(p));
-
     //Calculate the box which involve the square
-    sq.frame = cv::boundingRect(cv::Mat(p));//sq.rect.boundingRect();
-
-    //Save the points
+    sq.frame = cv::boundingRect(cv::Mat(p));
+    //Store points
     sq.points = p;
 
     return sq;
@@ -42,7 +39,7 @@ std::vector<Square> findSquares( const cv::Mat& image )
     cv::Mat gray = image.clone();
     std::vector<std::vector<cv::Point> > contours;
 
-    //MAS LENTO Y HACE QUE SE COJAN CUADRADOS EXTERNOS
+    //SLOWER
     //erote the image to fill holes 
     /*int erosion_size = 1;
     cv::Mat element = getStructuringElement( cv::MORPH_RECT,
