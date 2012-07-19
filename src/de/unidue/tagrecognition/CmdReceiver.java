@@ -74,7 +74,7 @@ public class CmdReceiver extends AsyncTask<Void, String, Void> {
 				} catch (IOException e) {
 					Log.i(TAG, "IOException. Connect wait aborted.");
 					end = true;
-					e.printStackTrace();
+					//e.printStackTrace();
 				} catch (Exception e) {
 					Log.i(TAG, "Exception. Connection interrupted.");
 					e.printStackTrace();
@@ -118,8 +118,10 @@ public class CmdReceiver extends AsyncTask<Void, String, Void> {
 
 	public void closeServer() {
 		try {
-			if (_serverSocket != null)
+			if (_serverSocket != null) {
 				_serverSocket.close();
+				_serverSocket = null;
+			}
 			Log.i(TAG, "Server closed.");
 		} catch (IOException e) {
 			Log.i(TAG, "Could not close server.");
@@ -127,4 +129,9 @@ public class CmdReceiver extends AsyncTask<Void, String, Void> {
 		}
 	}
 
+	@Override
+	protected void onCancelled() {
+		closeServer();
+		super.onCancelled();
+	}
 }

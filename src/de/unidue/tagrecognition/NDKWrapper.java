@@ -49,7 +49,7 @@ public class NDKWrapper {
 		return tags;
 	}
 
-	public void calibration(Bitmap bitmap ) {
+	public boolean calibration(Bitmap bitmap ) {
 		// prepare bitmap
 		int width = bitmap.getWidth();
 		int height = bitmap.getHeight();
@@ -57,9 +57,10 @@ public class NDKWrapper {
 		bitmap.getPixels(pixels, 0, width, 0, 0, width, height);
 		
 		//call jni method
-		boolean realize = calibrate(pixels, width, height);
+		boolean success = calibrate(pixels, width, height);
 		//Log.d("VALORES AJUSTADOS", "R:" + _RED_BOUNDARY + " G:" + _GREEN_BOUNDARY + " B:" + _BLUE_BOUNDARY);
-		Log.d("AJUSTE",""+realize);
-				
+		Log.d("AJUSTE",""+success);
+		
+		return success;
 	}
 }

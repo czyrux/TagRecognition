@@ -23,14 +23,15 @@ public final class R {
     }
     public static final class id {
         public static final int TextView_calibrate=0x7f080007;
-        public static final int TextView_info=0x7f080008;
+        public static final int TextView_info=0x7f080009;
         public static final int TextView_radar=0x7f080006;
+        public static final int TextView_stop=0x7f080008;
         public static final int calibrate_action=0x7f080000;
         public static final int container=0x7f080005;
-        public static final int controls_layout=0x7f08000a;
+        public static final int controls_layout=0x7f08000b;
         public static final int help_action=0x7f080002;
         public static final int help_layout=0x7f080004;
-        public static final int preview=0x7f080009;
+        public static final int preview=0x7f08000a;
         public static final int recognize_action=0x7f080001;
         public static final int stop_action=0x7f080003;
     }
@@ -43,14 +44,16 @@ public final class R {
         public static final int calibrate32=0x7f040000;
         public static final int calibrate38=0x7f040001;
         public static final int calibrate38gray=0x7f040002;
-        public static final int help38=0x7f040003;
-        public static final int radar38=0x7f040004;
-        public static final int radar48=0x7f040005;
-        public static final int radar48_grey=0x7f040006;
-        public static final int tag25=0x7f040007;
+        public static final int help32=0x7f040003;
+        public static final int help38=0x7f040004;
+        public static final int radar38=0x7f040005;
+        public static final int radar48=0x7f040006;
+        public static final int radar48_grey=0x7f040007;
+        public static final int stop32=0x7f040008;
+        public static final int stop38=0x7f040009;
+        public static final int tag25=0x7f04000a;
     }
     public static final class string {
-        public static final int _192_168_137_1=0x7f060008;
         public static final int app_name=0x7f060000;
         public static final int btn_calibrate_description=0x7f060007;
         public static final int btn_calibrate_label=0x7f060001;
@@ -58,6 +61,7 @@ public final class R {
         public static final int btn_info_description=0x7f060006;
         public static final int btn_radar_description=0x7f060005;
         public static final int btn_radar_label=0x7f060002;
+        public static final int btn_stop_description=0x7f060008;
         public static final int btn_stop_label=0x7f060004;
     }
     public static final class style {

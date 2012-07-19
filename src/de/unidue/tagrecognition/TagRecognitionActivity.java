@@ -145,7 +145,7 @@ public class TagRecognitionActivity extends Activity {
 				.setCancelable(true)
 				.setView(dialoglayout)
 				.setIcon(R.raw.tag25)
-				.setPositiveButton("Accept",
+				.setPositiveButton("close",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
 									int which) {
@@ -160,28 +160,43 @@ public class TagRecognitionActivity extends Activity {
 	}
 	
 	public void functionSearch() {
+		//Adjust buttons
 		_recognizerFunction = true;
+		_btn_help.setEnabled(false);
+		_btn_calibrate.setEnabled(false);
 		_btn_stop.setEnabled(true);
 		_btn_stop.setVisibility(0);
 		_btn_radar.setEnabled(false);
+		_btn_radar.setVisibility(View.GONE);
 
-		// change icon
-
-		// Activate timer
+		//Make action
 		createTimer();
 	}
 	
 	public void functionCalibrate() {
+		Toast.makeText(TagRecognitionActivity.this,
+				"Calibrating params. It can take a while",
+				Toast.LENGTH_SHORT).show();
+		//Adjust buttons
 		_recognizerFunction = false;
 		_btn_calibrate.setEnabled(false);
+		_btn_radar.setEnabled(false);
+		_btn_help.setEnabled(false);
+		//Make action
 		takingPicture();
 	}
 
 	public void functionStopSearch() {
+		//Adjust buttons
 		_timerOn = false;
 		_btn_stop.setVisibility(View.GONE);
 		_btn_stop.setEnabled(false);
+		_btn_help.setEnabled(true);
+		_btn_calibrate.setEnabled(true);
 		_btn_radar.setEnabled(true);
+		_btn_radar.setVisibility(0);
+		
+		//Make action
 		cleanTimer();
 	}
 	
@@ -221,7 +236,6 @@ public class TagRecognitionActivity extends Activity {
 			synchronized (_working) {
 				_working = true;
 			}
-			
 			_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
 				public synchronized void onAutoFocus(boolean success,
 						Camera camera) {
@@ -263,10 +277,21 @@ public class TagRecognitionActivity extends Activity {
 			if (_recognizerFunction == true) {
 				tags = _ndk.tagRecognizer(bmp);
 				processTags(tags);
-				_btn_calibrate.setEnabled(true);
 			} else {
-				_ndk.calibration(bmp);
+				boolean success = _ndk.calibration(bmp);
+				_btn_calibrate.setEnabled(true);
 				_btn_radar.setEnabled(true);
+				_btn_radar.setEnabled(true);
+				_btn_help.setEnabled(true);
+				
+				String s;
+				if (success) {
+					s = "Calibration process done.";
+				} else
+					s = "Calibration process cannot be done.";
+				Toast.makeText(TagRecognitionActivity.this,
+						s,
+						Toast.LENGTH_SHORT).show();
 			}
 
 			// Get time
@@ -295,7 +320,6 @@ public class TagRecognitionActivity extends Activity {
 	};
 	
 	
-	
 	@SuppressWarnings("unchecked")
 	private void processTags( String tagsinfo ){
 		//Store the tags founded
@@ -317,11 +341,6 @@ public class TagRecognitionActivity extends Activity {
 					tags.add(new Tag(Integer.parseInt(decompressTag[0]),
 							Integer.parseInt(decompressTag[1]),
 							decompressTag[2],time));
-					
-					//two times the same tag
-					tags.add(new Tag(Integer.parseInt(decompressTag[0]),
-							Integer.parseInt(decompressTag[1]),
-							decompressTag[2],time));
 				}
 				catch ( Exception e){
 					Log.e(TAG, "Format error reading a Tag");
@@ -329,7 +348,6 @@ public class TagRecognitionActivity extends Activity {
 			}
 
 		}else{
-			tags.add(new Tag(-1,-1,"",time));
 			tags.add(new Tag(-1,-1,"",time));
 			Log.d(TAG, "No tags founded");
 		}
@@ -340,10 +358,10 @@ public class TagRecognitionActivity extends Activity {
 		try {
 			boolean success = net.get();
 			if (success) {
-				Toast.makeText(TagRecognitionActivity.this,"Tags sendt.",
+				Toast.makeText(TagRecognitionActivity.this,"Tags sendt to server.",
 						Toast.LENGTH_SHORT).show();
 			}else {
-				Toast.makeText(TagRecognitionActivity.this,"Tags couldn't been sent.",
+				Toast.makeText(TagRecognitionActivity.this,"Tags couldn't been sent to server.",
 						Toast.LENGTH_SHORT).show();
 			}
 		} catch (InterruptedException e) {

@@ -34,14 +34,27 @@
             android:textColor="#FFF" />
 
         <TextView
+            android:id="@+id/TextView_stop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@raw/stop32"
+            android:paddingLeft="2dp"
+            android:drawablePadding="12dp"
+            android:paddingTop="5dp"
+            android:text="@string/btn_stop_description"
+            android:textColor="#FFF" />
+        
+        <TextView
             android:id="@+id/TextView_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@raw/help38"
-            android:drawablePadding="10dp"
+            android:drawableLeft="@raw/help32"
+            android:drawablePadding="12dp"
+            android:paddingLeft="2dp"
             android:paddingTop="5dp"
             android:text="@string/btn_info_description"
             android:textColor="#FFF" />
+        
     </LinearLayout>
 
 </ScrollView>
