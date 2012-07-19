@@ -34,39 +34,6 @@ void envDump(JNIEnv *env) {
 
 /**************************************/
 /*
-JNIEXPORT jbooleanArray JNICALL Java_de_unidue_tagrecognition_OpenCV_extractFAST(
-		JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
-		jint height) 
-{
-	LOGI("extractFAST enter\n");
-	IplImage *image_data = getIplImageFromIntArray(env, photo_data, width, height);
-	if (image_data == NULL) {
-		return 0;
-	}
- 	Mat img (image_data,true);
- 	Mat grey;
- 	cvtColor(img, grey, CV_BGR2GRAY);
-  	vector<KeyPoint> keypoints;
-
-  	// Detect the keypoints
-  	FeatureDetector *detector = new FastFeatureDetector(50);
-  	//FeatureDetector *detector = new SiftFeatureDetector(400, 500);
-  	//FeatureDetector *detector = new SurfFeatureDetector(400.);
-  	detector->detect(grey,keypoints);
-  	Scalar keypointColor = Scalar(0, 0, 255);     // color keypoints.
-    drawKeypoints(img_original, keypoints, img_result, keypointColor, DrawMatchesFlags::DEFAULT);
-  	drawKeypoints(img, keypoints, img, keypointColor, DrawMatchesFlags::DEFAULT);
-  	
-  	cvReleaseImage(&image_data);
-  	//image_data = &img.operator IplImage();
-  	LOGI("extract done\n");
-  	
-  	return getBmpImage(env,&img.operator IplImage());
-}
-
-
-/**************************************/
-/*
 JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNIEnv* env, jobject thiz) 
 {
 
@@ -121,7 +88,7 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNI
 /**************************************/
 
 
-JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagRecognizer(
+JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_NDKWrapper_tagRecognizer(
 		JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
 		jint height) 
 {
@@ -168,7 +135,7 @@ JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_JniWrapper_tagRecognizer
 
 /**************************************/
 
-JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_JniWrapper_calibrate(
+JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
         JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
         jint height) 
 {

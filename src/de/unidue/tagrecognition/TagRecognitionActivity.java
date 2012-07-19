@@ -3,10 +3,6 @@ package de.unidue.tagrecognition;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.ConnectException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -18,8 +14,8 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.res.Configuration;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -42,9 +38,10 @@ public class TagRecognitionActivity extends Activity {
 
 	private Preview _mPreview;
 	private Timer _timer;
-	private JniWrapper _jni;
+	private NDKWrapper _ndk;
 	private AlertDialog _helpMenu;
-	private NetworkTask _server;
+	private CmdReceiver _server;
+	private Handler _activityHandler;
 
 	private Button _btn_calibrate;
 	private Button _btn_radar;
@@ -55,7 +52,7 @@ public class TagRecognitionActivity extends Activity {
 	private Boolean _isAlive; //used to check if the program is still alive 
 	private Boolean _working; //used to check if one thread is making a picture
 	private boolean _timerOn; //used to check if the timer was activated
-	private boolean _serverOn;
+	private boolean _serverOn; //used to check if the server was running
 
 	/** Called when the activity is first created. */
 	@Override
@@ -67,9 +64,11 @@ public class TagRecognitionActivity extends Activity {
 
 		setContentView(R.layout.main);
 
-		// Initialization of internal variables, preview and ndk
-		_jni = new JniWrapper();
-		_mPreview = null;
+		// Initialization of internal variables, preview, ndk and command receiver server
+		_ndk = new NDKWrapper();
+		_activityHandler = new Handler();
+		_server = new CmdReceiver(this,_activityHandler);
+		_mPreview = new Preview(this);
 		_timer = null;
 		_helpMenu = null;
 
@@ -77,9 +76,9 @@ public class TagRecognitionActivity extends Activity {
 		_isAlive = true;
 		_timerOn = false;
 		_working = false;
+		_serverOn = true;
 
 		// Set preview and layout
-		_mPreview = new Preview(this);
 		((FrameLayout) findViewById(R.id.preview)).addView(_mPreview);
 		RelativeLayout relativeLayoutControls = (RelativeLayout) findViewById(R.id.controls_layout);
 		relativeLayoutControls.bringToFront();
@@ -95,15 +94,7 @@ public class TagRecognitionActivity extends Activity {
 		_btn_radar.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				_recognizerFunction = true;
-				_btn_stop.setEnabled(true);
-				_btn_stop.setVisibility(0);
-				_btn_radar.setEnabled(false);
-
-				// change icon
-
-				// Activate timer
-				createTimer();
+				functionSearch();
 			}
 		});
 		_btn_radar.setEnabled(true);
@@ -112,10 +103,7 @@ public class TagRecognitionActivity extends Activity {
 		_btn_calibrate.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// Call picture
-				_recognizerFunction = false;
-				_btn_calibrate.setEnabled(false);
-				takingPicture();
+				functionCalibrate();
 			}
 		});
 
@@ -124,29 +112,22 @@ public class TagRecognitionActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				// enable option buttons
-				_btn_calibrate.setEnabled(true);
-				_btn_radar.setEnabled(false);
+				//_btn_calibrate.setEnabled(true);
+				//_btn_radar.setEnabled(true);
 				// show alert dialog
 				createHelpMenu();
 			}
 		});
 
-		// actions for help button
+		// actions for STOP button
 		_btn_stop.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				_timerOn = false;
-				_btn_stop.setVisibility(View.GONE);
-				_btn_stop.setEnabled(false);
-				_btn_radar.setEnabled(true);
-				cleanTimer();
+				functionStopSearch();
 			}
 		});
-		_btn_stop.setEnabled(false);
-
-		//start server
-		_server = new NetworkTask();
-		_server.execute();
+		_btn_stop.setEnabled(false);		
+		
 	}
 
 	// Create the alert dialog with the help menu
@@ -177,10 +158,34 @@ public class TagRecognitionActivity extends Activity {
 		// show alertdialog
 		_helpMenu.show();
 	}
+	
+	public void functionSearch() {
+		_recognizerFunction = true;
+		_btn_stop.setEnabled(true);
+		_btn_stop.setVisibility(0);
+		_btn_radar.setEnabled(false);
 
+		// change icon
+
+		// Activate timer
+		createTimer();
+	}
+	
+	public void functionCalibrate() {
+		_recognizerFunction = false;
+		_btn_calibrate.setEnabled(false);
+		takingPicture();
+	}
+
+	public void functionStopSearch() {
+		_timerOn = false;
+		_btn_stop.setVisibility(View.GONE);
+		_btn_stop.setEnabled(false);
+		_btn_radar.setEnabled(true);
+		cleanTimer();
+	}
+	
 	// for the temporal calling to task
-	int i = 0;
-
 	class UpdateTimeTask extends TimerTask {
 		public void run() {
 			//if there are another avoid to put this one in the queue
@@ -196,7 +201,6 @@ public class TagRecognitionActivity extends Activity {
 	// Create timer
 	private void createTimer() {
 		_timerOn = true;
-		i = 0;
 		_timer = new Timer();
 		_timer.schedule(new UpdateTimeTask(), 0, 2000);
 	}
@@ -257,11 +261,11 @@ public class TagRecognitionActivity extends Activity {
 			// Select operation
 			String tags;
 			if (_recognizerFunction == true) {
-				tags = _jni.tagRecognizer(bmp);
+				tags = _ndk.tagRecognizer(bmp);
 				processTags(tags);
 				_btn_calibrate.setEnabled(true);
 			} else {
-				_jni.calibration(bmp);
+				_ndk.calibration(bmp);
 				_btn_radar.setEnabled(true);
 			}
 
@@ -289,6 +293,8 @@ public class TagRecognitionActivity extends Activity {
 			}
 		}
 	};
+	
+	
 	
 	@SuppressWarnings("unchecked")
 	private void processTags( String tagsinfo ){
@@ -329,7 +335,7 @@ public class TagRecognitionActivity extends Activity {
 		}
 		
 		//Send by net
-		SenderTags net = new SenderTags();
+		TagsSender net = new TagsSender();
 		net.execute(tags);
 		try {
 			boolean success = net.get();
@@ -341,6 +347,7 @@ public class TagRecognitionActivity extends Activity {
 						Toast.LENGTH_SHORT).show();
 			}
 		} catch (InterruptedException e) {
+			
 			e.printStackTrace();
 		} catch (ExecutionException e) {
 			e.printStackTrace();
@@ -403,7 +410,7 @@ public class TagRecognitionActivity extends Activity {
 		return mediaFile;
 	}
 */
-
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -418,6 +425,11 @@ public class TagRecognitionActivity extends Activity {
 		_isAlive = true;
 		_working = false;
 		
+		//if server was open
+		if (_serverOn) {
+			_server = new CmdReceiver(this,_activityHandler);
+			_server.execute();
+		}
 		super.onResume();
 	}
 
@@ -431,6 +443,7 @@ public class TagRecognitionActivity extends Activity {
 
 		if (_server!=null) {
 			_server.closeServer();
+			_server = null;
 		}
 		
 		super.onPause();
@@ -438,10 +451,10 @@ public class TagRecognitionActivity extends Activity {
 	
 	@Override
 	protected void onDestroy() {
-		super.onDestroy();
 		if (_helpMenu != null) {
 			_helpMenu.cancel();
-		}		
+		}	
+		super.onDestroy();
 	}
 
 }

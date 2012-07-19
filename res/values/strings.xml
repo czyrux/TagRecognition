@@ -8,4 +8,5 @@
     <string name="btn_radar_description">Search tags using the camera and send the result founded to the server. Previous calibration mandatory.</string>
     <string name="btn_info_description">Help menu</string>
     <string name="btn_calibrate_description">Calibrate the boundaries of R, G and B, in order, to detect this colors in the image. Used a template tag to calibrate. This template must be alone (without any other tag)</string>
+    <string name="_192_168_137_1">192.168.137.1</string>
 </resources>

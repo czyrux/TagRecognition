@@ -50,6 +50,7 @@ public final class R {
         public static final int tag25=0x7f040007;
     }
     public static final class string {
+        public static final int _192_168_137_1=0x7f060008;
         public static final int app_name=0x7f060000;
         public static final int btn_calibrate_description=0x7f060007;
         public static final int btn_calibrate_label=0x7f060001;
