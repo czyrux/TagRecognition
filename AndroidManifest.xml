@@ -26,7 +26,7 @@
             </intent-filter>
         </activity>
         
-        <service android:enabled="true" android:name=".CmdReceiverService" />
+        <service android:enabled="true" android:name=".CmdReceiver" />
     </application>
 
 </manifest>

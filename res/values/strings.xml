@@ -5,8 +5,13 @@
     <string name="btn_radar_label">Search tags</string>
     <string name="btn_help_label"></string>
     <string name="btn_stop_label">Stop search</string>
+    <string name="btn_settings_label">Settings</string>
+    <string name="btn_about_label">About</string>
+    <string name="btn_help_description">Help menu</string>
     <string name="btn_radar_description">Search tags using the images taken and send results found to the server. Previous calibration advisable.</string>
-    <string name="btn_info_description">Help menu</string>
     <string name="btn_calibrate_description">Calibrate the boundaries of R, G and B, in order, to detect this colors in the image. Used a template tag to calibrate. This template must be alone (without any other tag)</string>
     <string name="btn_stop_description">Stop search of tags.</string>
+    <string name="btn_settings_description">Allow to change the caracteristics (pattern,size, ect.) of the tags that we are looking for.</string>
+    <string name="btn_about_description">Information about app (developer, briefly description, version, etc.)</string>
+    
 </resources>

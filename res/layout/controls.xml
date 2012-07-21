@@ -34,8 +34,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:drawableTop="@drawable/help_button" 
-        android:contentDescription="@string/btn_info_description"
+        android:drawableTop="@raw/help38" 
+        android:contentDescription="@string/btn_help_description"
         android:text="@string/btn_help_label"
         style="@style/btn_style"/>
     

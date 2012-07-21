@@ -6,132 +6,142 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import android.os.AsyncTask;
-import android.os.Handler;
+import android.app.IntentService;
+import android.content.Intent;
+import android.os.Bundle;
 import android.util.Log;
 
-public class CmdReceiver extends AsyncTask<Void, String, Void> {
+public class CmdReceiver extends IntentService {
 	private final static String TAG = "CmdReceiver";
-	private final int SERVERPORT = 8000;
-	private ServerSocket _serverSocket;
-	private TagRecognitionActivity _activity;
-	private Handler _handler;
+	public static final String CmdReceiver_IN_MSG = "imsg";
+	public static final String CmdReceiver_OUT_MSG = "outmsg";
+	public static final int PARAM_START = 1;
+	public static final int PARAM_STOP = 2;
+	private static ServerThread _server = null;
 
-	public CmdReceiver(TagRecognitionActivity a, Handler handler) {
-		_activity = a;
-		_serverSocket = null;
-		_handler = handler;
+	public CmdReceiver() {
+		super("CmdReceiver");
 	}
 
 	@Override
-	protected Void doInBackground(Void... arg0) {
-		try {
-			_serverSocket = new ServerSocket(SERVERPORT);
-			_serverSocket.setReuseAddress(true);
-			Log.i(TAG, "Server created");
-		} catch (IOException e) {
-			Log.i(TAG, "IOException. Unable to create server");
-			e.printStackTrace();
+	protected void onHandleIntent(Intent intent) {
+		// Get intent value
+		int cmd = intent.getIntExtra(CmdReceiver_IN_MSG, 0);
+		// Select operation
+		switch (cmd) {
+		case PARAM_START:
+			runServer();
+			break;
+		case PARAM_STOP:
+			stopServer();
+			break;
+		default:
+			break;
+		}
+	}
+
+	void runServer() {
+		if (_server == null) {
+			_server = new ServerThread();
+			Thread sf = new Thread(_server);
+			sf.start();
+		}
+	}
+
+	void stopServer() {
+		if (_server != null) {
+			_server.closeServer();
+			_server = null;
+		}
+	}
+
+	void sendCmd(String cmd) {
+		Intent i = new Intent();
+		Bundle bundle = new Bundle();
+		bundle.putString(CmdReceiver_OUT_MSG, cmd);
+		i.putExtras(bundle);
+		i.setAction(CmdReceiver.CmdReceiver_OUT_MSG);
+		this.sendBroadcast(i);
+	}
+
+	public class ServerThread implements Runnable {
+		private final int SERVERPORT = 8000;
+		private ServerSocket _serverSocket;
+
+		public ServerThread() {
 			_serverSocket = null;
 		}
 
-		if (_serverSocket != null) {
-			Object o;
-			boolean end = false;
-			while (!end) {
-				try {
-					// listen for incoming clients
-					Log.d(TAG, "Server listening: " + SERVERPORT);
-					Socket _client = _serverSocket.accept();
-
-					// Process the client
-					Log.i(TAG, "Client connected");
-
-					// Create stream for communication
-					ObjectInputStream in = new ObjectInputStream(
-							_client.getInputStream());
-					ObjectOutputStream out = new ObjectOutputStream(
-							_client.getOutputStream());
-
-					// read command
-					Log.i(TAG, "Waiting command...");
-					o = in.readObject();
-					if (o instanceof String) {
-						Log.i(TAG, "Received: " + o.toString());
-						// Send to main activity
-						onProgressUpdate((String) o);
-					}
-
-					// send confirmation
-					Log.i(TAG, "Sending ACK");
-					out.writeObject(CMD.ACK.toString());
-					out.flush();
-
-					// close streams
-					in.close();
-					out.close();
-
-				} catch (IOException e) {
-					Log.i(TAG, "IOException. Connect wait aborted.");
-					end = true;
-					//e.printStackTrace();
-				} catch (Exception e) {
-					Log.i(TAG, "Exception. Connection interrupted.");
-					e.printStackTrace();
-				}
-			}// while
-		}
-
-		return null;
-	}
-
-	@Override
-	protected void onProgressUpdate(String... values) {
-		String cmd = values[0];
-		if (cmd.equals(CMD.CALIBRATE.toString())) {
-			_handler.post(new Runnable() {
-				@Override
-				public void run() {
-					_activity.functionCalibrate();
-				}
-
-			});
-
-		} else if (cmd.equals(CMD.START_SEARCH.toString())) {
-			_handler.post(new Runnable() {
-				@Override
-				public void run() {
-					_activity.functionSearch();
-				}
-
-			});
-		} else if (cmd.equals(CMD.STOP_SEARCH.toString())) {
-			_handler.post(new Runnable() {
-				@Override
-				public void run() {
-					_activity.functionStopSearch();
-				}
-
-			});
-		}
-	}
-
-	public void closeServer() {
-		try {
-			if (_serverSocket != null) {
-				_serverSocket.close();
+		public void run() {
+			try {
+				_serverSocket = new ServerSocket(SERVERPORT);
+				_serverSocket.setReuseAddress(true);
+				Log.i(TAG, "Server created");
+			} catch (IOException e) {
+				Log.i(TAG, "IOException. Unable to create server");
+				e.printStackTrace();
 				_serverSocket = null;
 			}
-			Log.i(TAG, "Server closed.");
-		} catch (IOException e) {
-			Log.i(TAG, "Could not close server.");
-			e.printStackTrace();
+
+			if (_serverSocket != null) {
+				Object o;
+				boolean end = false;
+				while (!end) {
+					try {
+						// listen for incoming clients
+						Log.d(TAG, "Server listening: " + SERVERPORT);
+						Socket _client = _serverSocket.accept();
+
+						// Process the client
+						Log.i(TAG, "Client connected");
+
+						// Create stream for communication
+						ObjectInputStream in = new ObjectInputStream(
+								_client.getInputStream());
+						ObjectOutputStream out = new ObjectOutputStream(
+								_client.getOutputStream());
+
+						// read command
+						Log.i(TAG, "Waiting command...");
+						o = in.readObject();
+						if (o instanceof String) {
+							Log.i(TAG, "Received: " + o.toString());
+							// Send cmd to main activity
+							sendCmd((String) o);
+						}
+
+						// send confirmation
+						Log.i(TAG, "Sending ACK");
+						out.writeObject(Message.ACK.toString());
+						out.flush();
+
+						// close streams
+						in.close();
+						out.close();
+
+					} catch (IOException e) {
+						Log.i(TAG, "IOException. Connect wait aborted.");
+						end = true;
+						// e.printStackTrace();
+					} catch (Exception e) {
+						Log.i(TAG, "Exception. Connection interrupted.");
+						e.printStackTrace();
+					}
+				}// while
+			}// if (_serverSocket != null)
+
+		}
+
+		public void closeServer() {
+			if (_serverSocket != null) {
+				try {
+					_serverSocket.close();
+					Log.i(TAG, "ServerThread: Server closed.");
+				} catch (IOException e) {
+					Log.i(TAG, "ServerThread: Could not close socket");
+				}
+			}
 		}
 	}
 
-	@Override
-	protected void onCancelled() {
-		closeServer();
-		super.onCancelled();
-	}
 }

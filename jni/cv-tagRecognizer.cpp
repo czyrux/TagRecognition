@@ -139,6 +139,9 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
         JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
         jint height) 
 {
+    //Backups of old values
+    int backUpR = RED_BOUNDARY , backUpB = BLUE_BOUNDARY, backUpG = GREEN_BOUNDARY;
+
     //Initialize values of boundaries
     RED_BOUNDARY = BLUE_BOUNDARY = GREEN_BOUNDARY = 0;
 
@@ -161,8 +164,6 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
 
         //check if found something
         if ( !tags.empty() ) {
-            //log
-            os << "FOUND_";
             //get the first one. Suppose to be only one
             std::string tag = tags.front().code;
             LOGI(tag.c_str());
@@ -177,22 +178,24 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
             }
             
         }else {
-            //log
-            os<<"NOT_FOUND_";
             RED_BOUNDARY -= 10; //adjust to find red border
             BLUE_BOUNDARY -= 5; //or to find the blue square
         }
+
+        //condition of exit
+        if (RED_BOUNDARY <= - 100 || BLUE_BOUNDARY <= -100 || GREEN_BOUNDARY <= -100 ) {
+            exit_ = true;
+            //Restore original values
+            RED_BOUNDARY = backUpR;
+            BLUE_BOUNDARY = backUpB;
+            GREEN_BOUNDARY = backUpG;
+        } 
 
         //log
         os << "itr: " << i << " | R: " << RED_BOUNDARY << " | G: " << GREEN_BOUNDARY << " | B: " << BLUE_BOUNDARY << " |";
         i++;
         LOGI(os.str().c_str());
-
-        //condition of exit
-        if (RED_BOUNDARY <= - 100 || BLUE_BOUNDARY <= -100 || GREEN_BOUNDARY <= -100 ) {
-            exit_ = true;
-        } 
-
+        
         //release memory
         if (data->src)  cvReleaseImage(&data->src);
         if (data->rImage)  cvReleaseImage(&data->rImage);

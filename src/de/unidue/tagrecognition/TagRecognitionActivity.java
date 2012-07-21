@@ -12,10 +12,13 @@ import java.util.concurrent.ExecutionException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
-import android.os.Handler;
 
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
@@ -24,6 +27,9 @@ import android.hardware.Camera;
 import android.hardware.Camera.PictureCallback;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -40,21 +46,20 @@ public class TagRecognitionActivity extends Activity {
 	private Timer _timer;
 	private NDKWrapper _ndk;
 	private AlertDialog _helpMenu;
-	private CmdReceiver _server;
-	private Handler _activityHandler;
+	private CmdReceiver2 _server;
+	private mCmdReceiver _notification;
+	private Actions _currentAction;
 
 	private Button _btn_calibrate;
 	private Button _btn_radar;
 	private Button _btn_help;
 	private Button _btn_stop;
 
-	private boolean _recognizerFunction;
 	private Boolean _isAlive; //used to check if the program is still alive 
 	private Boolean _working; //used to check if one thread is making a picture
 	private boolean _timerOn; //used to check if the timer was activated
 	private boolean _serverOn; //used to check if the server was running
 
-	/** Called when the activity is first created. */
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -66,13 +71,15 @@ public class TagRecognitionActivity extends Activity {
 
 		// Initialization of internal variables, preview, ndk and command receiver server
 		_ndk = new NDKWrapper();
-		_activityHandler = new Handler();
-		_server = new CmdReceiver(this,_activityHandler);
+		//_server = new CmdReceiver2(this,_activityHandler);
+		_notification = null;
+		//_server = null;
 		_mPreview = new Preview(this);
 		_timer = null;
 		_helpMenu = null;
-
-		// Boolean control variables
+		
+		// Control variables
+		_currentAction = Actions.NONE;
 		_isAlive = true;
 		_timerOn = false;
 		_working = false;
@@ -88,16 +95,14 @@ public class TagRecognitionActivity extends Activity {
 		_btn_radar = (Button) findViewById(R.id.recognize_action);
 		_btn_calibrate = (Button) findViewById(R.id.calibrate_action);
 		_btn_stop = (Button) findViewById(R.id.stop_action);
-		_btn_stop.setVisibility(View.GONE);
 
-		// recognize button action
+		// actions for radar button
 		_btn_radar.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
 				functionSearch();
 			}
 		});
-		_btn_radar.setEnabled(true);
 
 		// actions for calibrate button
 		_btn_calibrate.setOnClickListener(new View.OnClickListener() {
@@ -126,10 +131,41 @@ public class TagRecognitionActivity extends Activity {
 				functionStopSearch();
 			}
 		});
-		_btn_stop.setEnabled(false);		
-		
+
+		//initial state
+		initialState();
 	}
 
+	/**
+	 * 
+	 */
+	private void enableServer() {
+		//Create server
+		Intent i = new Intent(this, CmdReceiver.class);
+		i.putExtra(CmdReceiver.CmdReceiver_IN_MSG,CmdReceiver.PARAM_START);
+		startService(i);
+				
+		// Prepare to receive notifications from service
+		_notification = new mCmdReceiver();
+		IntentFilter intentFilter = new IntentFilter(CmdReceiver.CmdReceiver_OUT_MSG);
+		registerReceiver(_notification, intentFilter);
+	}
+	
+	/**
+	 * 
+	 */
+	private void disableServer() {
+		//Unregister receiver
+		if (_notification != null) {
+			unregisterReceiver(_notification);
+			_notification = null;
+		}
+		//Stop server
+		Intent i = new Intent(this, CmdReceiver.class);
+		i.putExtra(CmdReceiver.CmdReceiver_IN_MSG,CmdReceiver.PARAM_STOP);
+		startService(i);
+	}
+	
 	// Create the alert dialog with the help menu
 	private void createHelpMenu() 
 	{
@@ -160,44 +196,75 @@ public class TagRecognitionActivity extends Activity {
 	}
 	
 	public void functionSearch() {
-		//Adjust buttons
-		_recognizerFunction = true;
-		_btn_help.setEnabled(false);
-		_btn_calibrate.setEnabled(false);
-		_btn_stop.setEnabled(true);
-		_btn_stop.setVisibility(0);
-		_btn_radar.setEnabled(false);
-		_btn_radar.setVisibility(View.GONE);
-
-		//Make action
-		createTimer();
+		if ( _currentAction == Actions.NONE ) {
+			//Adjust buttons
+			_btn_help.setEnabled(false);
+			_btn_calibrate.setEnabled(false);
+			_btn_stop.setEnabled(true);
+			_btn_stop.setVisibility(0);
+			_btn_radar.setEnabled(false);
+			_btn_radar.setVisibility(View.GONE);
+			//Set action
+			_currentAction = Actions.RECOGNITION;
+			//Make action
+			_timerOn = true;
+			createTimer();
+		}
+		
 	}
 	
 	public void functionCalibrate() {
-		Toast.makeText(TagRecognitionActivity.this,
-				"Calibrating params. It can take a while",
-				Toast.LENGTH_SHORT).show();
-		//Adjust buttons
-		_recognizerFunction = false;
-		_btn_calibrate.setEnabled(false);
-		_btn_radar.setEnabled(false);
-		_btn_help.setEnabled(false);
-		//Make action
-		takingPicture();
+		if ( _currentAction == Actions.NONE ) {
+			Toast.makeText(TagRecognitionActivity.this,
+					"Calibrating params. It can take a while",
+					Toast.LENGTH_SHORT).show();
+			//Adjust buttons
+			_btn_calibrate.setEnabled(false);
+			_btn_radar.setEnabled(false);
+			_btn_help.setEnabled(false);
+			//Set action
+			_currentAction = Actions.CALIBRATION;
+			//Make action
+			takingPicture();
+		}
 	}
 
 	public void functionStopSearch() {
+		if ( _currentAction == Actions.RECOGNITION ) {
+			//Adjust buttons and state
+			initialState();
+			//Make action
+			_timerOn = false;
+			cleanTimer();
+		}
+	}
+	
+	public void functionSendView() {
+		if ( _currentAction == Actions.NONE ) {
+			Toast.makeText(TagRecognitionActivity.this,
+					"Sending view to server. It can take a while.",
+					Toast.LENGTH_LONG).show();
+			//Adjust buttons
+			_btn_calibrate.setEnabled(false);
+			_btn_radar.setEnabled(false);
+			_btn_help.setEnabled(false);
+			//Set action
+			_currentAction = Actions.SENDING_VIEW;
+			//Make action
+			takingPicture();
+		}
+	}
+	
+	private void initialState() {
 		//Adjust buttons
-		_timerOn = false;
 		_btn_stop.setVisibility(View.GONE);
 		_btn_stop.setEnabled(false);
 		_btn_help.setEnabled(true);
 		_btn_calibrate.setEnabled(true);
 		_btn_radar.setEnabled(true);
 		_btn_radar.setVisibility(0);
-		
-		//Make action
-		cleanTimer();
+		//Set action
+		_currentAction = Actions.NONE;
 	}
 	
 	// for the temporal calling to task
@@ -215,7 +282,6 @@ public class TagRecognitionActivity extends Activity {
 
 	// Create timer
 	private void createTimer() {
-		_timerOn = true;
 		_timer = new Timer();
 		_timer.schedule(new UpdateTimeTask(), 0, 2000);
 	}
@@ -274,24 +340,15 @@ public class TagRecognitionActivity extends Activity {
 
 			// Select operation
 			String tags;
-			if (_recognizerFunction == true) {
+			if (_currentAction == Actions.RECOGNITION) {
 				tags = _ndk.tagRecognizer(bmp);
 				processTags(tags);
-			} else {
+			} else if (_currentAction == Actions.CALIBRATION) {
 				boolean success = _ndk.calibration(bmp);
-				_btn_calibrate.setEnabled(true);
-				_btn_radar.setEnabled(true);
-				_btn_radar.setEnabled(true);
-				_btn_help.setEnabled(true);
+				processCalibrationResult(success);
 				
-				String s;
-				if (success) {
-					s = "Calibration process done.";
-				} else
-					s = "Calibration process cannot be done.";
-				Toast.makeText(TagRecognitionActivity.this,
-						s,
-						Toast.LENGTH_SHORT).show();
+				//return to initial state
+				initialState();
 			}
 
 			// Get time
@@ -320,9 +377,33 @@ public class TagRecognitionActivity extends Activity {
 	};
 	
 	
-	@SuppressWarnings("unchecked")
+	private void processCalibrationResult ( boolean success ) {
+		ArrayList<String> s = new ArrayList<String>();
+		if (success) {
+			s.add(Message.CALIBRATION_OK.toString());
+			Toast.makeText(TagRecognitionActivity.this,"Calibration done.",
+					Toast.LENGTH_SHORT).show();
+		} else {
+			s.add(Message.CALIBRATION_FAIL.toString());
+			Toast.makeText(TagRecognitionActivity.this,"Calibration couldn't been done.",
+					Toast.LENGTH_SHORT).show();
+		}
+		
+		//Send situation of calibration
+		DataSender sender = new DataSender();
+		sender.execute(s);
+		try {
+			sender.get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
 	private void processTags( String tagsinfo ){
-		//Store the tags founded
+		//Hold the tags founded
 		ArrayList<Tag> tags = new ArrayList<Tag>();
 		//Get current time
 		Date time = new Date();
@@ -353,10 +434,11 @@ public class TagRecognitionActivity extends Activity {
 		}
 		
 		//Send by net
-		TagsSender net = new TagsSender();
-		net.execute(tags);
+		DataSender sender = new DataSender();
+		sender.execute(tags);
 		try {
-			boolean success = net.get();
+			//wait the end the process
+			boolean success = sender.get();
 			if (success) {
 				Toast.makeText(TagRecognitionActivity.this,"Tags sendt to server.",
 						Toast.LENGTH_SHORT).show();
@@ -365,13 +447,14 @@ public class TagRecognitionActivity extends Activity {
 						Toast.LENGTH_SHORT).show();
 			}
 		} catch (InterruptedException e) {
-			
 			e.printStackTrace();
 		} catch (ExecutionException e) {
 			e.printStackTrace();
 		}
 	}
 
+	
+	
 	// Save Bitmap
 	/*
 	private void storeBitmap(Bitmap bmp, String head) {
@@ -429,6 +512,50 @@ public class TagRecognitionActivity extends Activity {
 	}
 */
 	
+	public class mCmdReceiver extends BroadcastReceiver {
+		@Override
+		public void onReceive(Context context, Intent intent) {
+			Bundle bundle = intent.getExtras();
+			String cmd = bundle.getString(CmdReceiver.CmdReceiver_OUT_MSG);
+			if (cmd.equals(Message.CALIBRATE.toString())) {
+				functionCalibrate();
+			} 
+			else if (cmd.equals(Message.START_SEARCH.toString())) {
+				functionSearch();
+			} 
+			else if (cmd.equals(Message.STOP_SEARCH.toString())) {
+				functionStopSearch();
+			}
+			else if (cmd.equals(Message.SEND_VIEW.toString())) {
+				functionSendView();
+			}
+		}
+
+	}
+	
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		// TODO Auto-generated method stub
+		MenuInflater inflater = getMenuInflater();
+	    inflater.inflate(R.layout.menu, menu);
+	    return true;
+	}
+	
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		// TODO Auto-generated method stub
+		switch (item.getItemId()) {
+	    case R.id.menu_about:
+	    	//startActivity(new Intent(this, About.class));
+	    	return true;
+	    case R.id.menu_settings:
+	    	//startActivity(new Intent(this, Help.class));
+	    	return true;
+	    default:
+	    	return super.onOptionsItemSelected(item);
+		}
+	}
+	
 	@Override
 	public void onConfigurationChanged(Configuration newConfig) {
 		super.onConfigurationChanged(newConfig);
@@ -436,18 +563,18 @@ public class TagRecognitionActivity extends Activity {
 
 	@Override
 	protected void onResume() {
-		//If timer was working, create a new one
+		//If timer was working begin again with recognition
 		if (_timerOn) {
-			createTimer();
+			functionSearch();
 		}
 		_isAlive = true;
 		_working = false;
 		
-		//if server was open
+		//Open server
 		if (_serverOn) {
-			_server = new CmdReceiver(this,_activityHandler);
-			_server.execute();
+			enableServer();
 		}
+		
 		super.onResume();
 	}
 
@@ -458,11 +585,12 @@ public class TagRecognitionActivity extends Activity {
 		}
 		_mPreview.release();
 		cleanTimer();
-
-		if (_server!=null) {
-			_server.closeServer();
-			_server = null;
-		}
+		
+		//Close server
+		disableServer();
+				
+		//Reset buttons
+		initialState();	
 		
 		super.onPause();
 	}

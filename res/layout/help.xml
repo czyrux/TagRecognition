@@ -45,14 +45,25 @@
             android:textColor="#FFF" />
         
         <TextView
-            android:id="@+id/TextView_info"
+            android:id="@+id/TextView_settings"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:drawableLeft="@raw/help32"
+            android:drawableLeft="@raw/settings32"
+            android:paddingLeft="2dp"
+            android:drawablePadding="12dp"
+            android:paddingTop="5dp"
+            android:text="@string/btn_settings_description"
+            android:textColor="#FFF" />
+        
+        <TextView
+            android:id="@+id/TextView_about"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@raw/about32"
             android:drawablePadding="12dp"
             android:paddingLeft="2dp"
             android:paddingTop="5dp"
-            android:text="@string/btn_info_description"
+            android:text="@string/btn_about_description"
             android:textColor="#FFF" />
         
     </LinearLayout>
