@@ -9,6 +9,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -47,29 +48,34 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 				_in = new ObjectInputStream(_socket.getInputStream());
 				Log.i(TAG, "Streams created");
 
-				// Send array of tags
-				for (int i=0 ; i<objects.size() ; i++) {
-					if (objects.get(i) instanceof Tag )
-						Log.i(TAG, "Sending tag: " + objects.get(i).toString());
+				// Send objects
+				for (int i = 0; i < objects.size(); i++) {
+					//if (objects.get(i) instanceof byte[]) {
+						//sendImageToServer((Bitmap) objects.get(i));
+					//} else {
+						if (objects.get(i) instanceof Tag)
+							Log.i(TAG, "Sending tag: "
+									+ objects.get(i).toString());
 
-					// Send tag
-					_out.writeObject(objects.get(i));
-					_out.flush();
+						// Send object
+						_out.writeObject(objects.get(i));
+						_out.flush();
 
-					// Wait confirmation
-					try {
-						Log.i(TAG, "Waiting ACK");
-						o = _in.readObject();
-						if (o.equals(Message.ACK.toString())) {
-							Log.i(TAG, "ACK received");
+						// Wait confirmation
+						try {
+							Log.i(TAG, "Waiting ACK");
+							o = _in.readObject();
+							if (o.equals(Message.ACK.toString())) {
+								Log.i(TAG, "ACK received");
+							}
+						} catch (ClassNotFoundException e) {
+							Log.i(TAG, "ClassNotFoundException");
+							e.printStackTrace();
 						}
-					} catch (ClassNotFoundException e) {
-						Log.i(TAG, "ClassNotFoundException");
-						e.printStackTrace();
-					}
+					//}// end else
 					
-					//If it is the last close communication
-					if ( i == objects.size()-1 ) {
+					// If it is the last close communication
+					if (i == objects.size() - 1) {
 						Log.i(TAG, "Sending end of communication");
 						_out.writeObject(Message.QUIT.toString());
 						_out.flush();
@@ -85,7 +91,7 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 							e.printStackTrace();
 						}
 					}
-				}//end for
+				}// end for
 			}
 
 		} catch (UnknownHostException e) {
@@ -97,7 +103,7 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 			sent = false;
 			e.printStackTrace();
 		} finally {
-			//Close sockets and streams
+			// Close sockets and streams
 			try {
 				if (_in != null)
 					_in.close();
@@ -116,6 +122,10 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 		}
 
 		return sent;
+	}
+
+	private void sendImageToServer(Bitmap data) {
+
 	}
 
 	@Override

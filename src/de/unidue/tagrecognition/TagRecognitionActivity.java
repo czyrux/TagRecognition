@@ -346,7 +346,10 @@ public class TagRecognitionActivity extends Activity {
 			} else if (_currentAction == Actions.CALIBRATION) {
 				boolean success = _ndk.calibration(bmp);
 				processCalibrationResult(success);
-				
+				//return to initial state
+				initialState();
+			} if (_currentAction == Actions.SENDING_VIEW) {
+				processView(data);
 				//return to initial state
 				initialState();
 			}
@@ -376,6 +379,23 @@ public class TagRecognitionActivity extends Activity {
 		}
 	};
 	
+	private void processView (byte[] data) {
+		ArrayList<byte[]> array = new ArrayList<byte[]>();
+		//ArrayList<Bitmap> array = new ArrayList<Bitmap>();
+		//array.add(bmp);
+		array.add(data);
+		//Send situation of calibration
+		DataSender sender = new DataSender();
+		sender.execute(array);
+		//Wait end of operation
+		try {
+			sender.get();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (ExecutionException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	private void processCalibrationResult ( boolean success ) {
 		ArrayList<String> s = new ArrayList<String>();
