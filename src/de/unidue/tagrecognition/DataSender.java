@@ -9,7 +9,6 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
-import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -50,30 +49,29 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 
 				// Send objects
 				for (int i = 0; i < objects.size(); i++) {
-					//if (objects.get(i) instanceof byte[]) {
-						//sendImageToServer((Bitmap) objects.get(i));
-					//} else {
-						if (objects.get(i) instanceof Tag)
-							Log.i(TAG, "Sending tag: "
-									+ objects.get(i).toString());
+					// if (objects.get(i) instanceof byte[]) {
+					// sendImageToServer((Bitmap) objects.get(i));
+					// } else {
+					if (objects.get(i) instanceof Tag)
+						Log.i(TAG, "Sending tag: " + objects.get(i).toString());
 
-						// Send object
-						_out.writeObject(objects.get(i));
-						_out.flush();
+					// Send object
+					_out.writeObject(objects.get(i));
+					_out.flush();
 
-						// Wait confirmation
-						try {
-							Log.i(TAG, "Waiting ACK");
-							o = _in.readObject();
-							if (o.equals(Message.ACK.toString())) {
-								Log.i(TAG, "ACK received");
-							}
-						} catch (ClassNotFoundException e) {
-							Log.i(TAG, "ClassNotFoundException");
-							e.printStackTrace();
+					// Wait confirmation
+					try {
+						Log.i(TAG, "Waiting ACK");
+						o = _in.readObject();
+						if (o.equals(Message.ACK.toString())) {
+							Log.i(TAG, "ACK received");
 						}
-					//}// end else
-					
+					} catch (ClassNotFoundException e) {
+						Log.i(TAG, "ClassNotFoundException");
+						e.printStackTrace();
+					}
+					// }// end else
+
 					// If it is the last close communication
 					if (i == objects.size() - 1) {
 						Log.i(TAG, "Sending end of communication");
@@ -122,10 +120,6 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 		}
 
 		return sent;
-	}
-
-	private void sendImageToServer(Bitmap data) {
-
 	}
 
 	@Override
