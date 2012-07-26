@@ -227,8 +227,8 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
     //build tags
     Tag aux;
     for ( int i=0 ; i<codes.size() ; i++ ) {
-        aux.x = squares[i].rect.center.x;
-        aux.y = squares[i].rect.center.y;
+        aux.x = (squares[i].rect.center.x * 100 ) / img.cols;
+        aux.y = (squares[i].rect.center.y * 100 ) / img.rows;
         aux.code = codes[i];
         tags.push_back(aux);
     }

@@ -6,31 +6,31 @@ import java.util.Date;
 
 public class Tag implements Serializable {
 	private static final long serialVersionUID = 1L;
-	private int _x;
-	private int _y;
+	private float _x;
+	private float _y;
 	private String _code;
 	private Date _time;
 
-	public Tag(int x, int y, String code, Date time) {
+	public Tag(float x, float y, String code, Date time) {
 		_x = x;
 		_y = y;
 		_code = code;
 		_time = time;
 	}
 
-	public int getX() {
+	public float getX() {
 		return _x;
 	}
 
-	public void setX(int x) {
+	public void setX(float x) {
 		this._x = x;
 	}
 
-	public int getY() {
+	public float getY() {
 		return _y;
 	}
 
-	public void setY(int y) {
+	public void setY(float y) {
 		this._y = y;
 	}
 
@@ -49,6 +49,7 @@ public class Tag implements Serializable {
 	public void setTime(Date time) {
 		this._time = time;
 	}
+
 
 	@Override
 	public String toString() {

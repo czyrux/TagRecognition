@@ -14,4 +14,23 @@
     <string name="btn_settings_description">Allow to change the caracteristics (pattern,size, ect.) of the tags that we are looking for.</string>
     <string name="btn_about_description">Information about app (developer, briefly description, version, etc.)</string>
     
+    <string name="sett_tag_section">Tags parameters:</string>
+    <string name="sett_tag_cols">Num. of cols:</string>
+    <string name="sett_tag_rows">Num. of rows:</string>
+    <string name="sett_tag_height">Height (cm):</string>
+    <string name="sett_tag_width">Width (cm):</string>
+    <string name="sett_tag_border">Border size(cm):</string>
+    
+    <string name="btn_stt_accept">Save</string>
+    <string name="btn_stt_cancel">Cancel</string>
+    
+    <string name="sett_server_own">Own server</string>
+    <string name="sett_server_desk">Desktop server</string>
+    <string name="sett_server_ip">IP (192.168.3.1):</string>
+    <string name="sett_server_port">Port  (e.g: 8080):</string>
+    
+    <string name="sett_oth">Others</string>
+    <string name="sett_oth_checkbox">Debug Mode</string>
+
+    <string name="separator_description">Separator</string>
 </resources>

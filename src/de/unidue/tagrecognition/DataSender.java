@@ -1,5 +1,6 @@
 package de.unidue.tagrecognition;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -9,6 +10,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
+import android.graphics.Bitmap;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -49,15 +51,16 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 
 				// Send objects
 				for (int i = 0; i < objects.size(); i++) {
-					// if (objects.get(i) instanceof byte[]) {
-					// sendImageToServer((Bitmap) objects.get(i));
-					// } else {
-					if (objects.get(i) instanceof Tag)
-						Log.i(TAG, "Sending tag: " + objects.get(i).toString());
+					if (objects.get(i) instanceof Bitmap) {
+						sendImage(((Bitmap)objects.get(i)));
+					}else {
+						if (objects.get(i) instanceof Tag)
+							Log.i(TAG, "Sending tag: " + objects.get(i).toString());
 
-					// Send object
-					_out.writeObject(objects.get(i));
-					_out.flush();
+						// Send object
+						_out.writeObject(objects.get(i));
+						_out.flush();
+					}
 
 					// Wait confirmation
 					try {
@@ -70,7 +73,6 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 						Log.i(TAG, "ClassNotFoundException");
 						e.printStackTrace();
 					}
-					// }// end else
 
 					// If it is the last close communication
 					if (i == objects.size() - 1) {
@@ -120,6 +122,14 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 		}
 
 		return sent;
+	}
+
+	private void sendImage( Bitmap bmp ) throws IOException {
+		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+		bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+		byte[] byteArray = stream.toByteArray();
+		_out.writeObject(byteArray);
+		_out.flush();
 	}
 
 	@Override

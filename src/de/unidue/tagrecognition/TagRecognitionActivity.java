@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -294,8 +295,12 @@ public class TagRecognitionActivity extends Activity {
 				_working = true;
 			}
 			_mPreview.mCamera.autoFocus(new Camera.AutoFocusCallback() {
-				public synchronized void onAutoFocus(boolean success,
+				public void onAutoFocus(boolean success,
 						Camera camera) {
+					synchronized (_isAlive) {
+						if (!_isAlive)
+							return;
+					}
 					// take picture
 					camera.takePicture(null, null, _jpegCallback);
 				}
@@ -303,8 +308,8 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
-	protected void processView(byte[] data) {
-		ArrayList<byte[]> array = new ArrayList<byte[]>();
+	protected void processView(Bitmap data) {
+		ArrayList<Bitmap> array = new ArrayList<Bitmap>();
 		array.add(data);
 		// Send situation of calibration
 		DataSender sender = new DataSender();
@@ -360,8 +365,8 @@ public class TagRecognitionActivity extends Activity {
 			for (int i = 0; i < taginfo.length; i++) {
 				try {
 					String[] decompressTag = taginfo[i].split("/");
-					tags.add(new Tag(Integer.parseInt(decompressTag[0]),
-							Integer.parseInt(decompressTag[1]),
+					tags.add(new Tag(Float.parseFloat(decompressTag[0]),
+							Float.parseFloat(decompressTag[1]),
 							decompressTag[2], time));
 				} catch (Exception e) {
 					Log.e(TAG, "Format error reading a Tag");
@@ -369,7 +374,7 @@ public class TagRecognitionActivity extends Activity {
 			}
 
 		} else {
-			tags.add(new Tag(-1, -1, "", time));
+			tags.add(new Tag(-1, -1,"", time));
 			Log.d(TAG, "No tags founded");
 		}
 
@@ -414,7 +419,6 @@ public class TagRecognitionActivity extends Activity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-		// TODO Auto-generated method stub
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.layout.menu, menu);
 		return true;
@@ -428,7 +432,7 @@ public class TagRecognitionActivity extends Activity {
 			// startActivity(new Intent(this, About.class));
 			return true;
 		case R.id.menu_settings:
-			// startActivity(new Intent(this, Help.class));
+			startActivity(new Intent(this,SettingsActivity.class));
 			return true;
 		default:
 			return super.onOptionsItemSelected(item);

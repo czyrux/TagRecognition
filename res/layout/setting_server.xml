@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+    
+	<TextView
+           	android:layout_width="wrap_content"
+           	android:layout_height="wrap_content"
+           	android:text="@string/sett_server_own"
+          	android:textAppearance="?android:attr/textAppearanceMedium"
+          	android:textStyle="italic"
+          	android:paddingLeft="5dp" />
+
+       <TableLayout
+           	android:layout_width="match_parent"
+           	android:layout_height="wrap_content"
+           	android:orientation="vertical" 
+           	android:paddingLeft="30dp">
+
+           	<TableRow
+               	android:layout_width="wrap_content"
+               	android:layout_height="wrap_content" >
+               	<TextView
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:text="@string/sett_server_port"
+               		android:textAppearance="?android:attr/textAppearanceSmall" />
+
+               	<EditText
+                   	android:id="@+id/editText_own_port"
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:ems="10"
+                   	android:inputType="text" />
+           </TableRow>
+    </TableLayout>
+        <ImageView
+           android:layout_width="wrap_content"
+           android:layout_height="wrap_content"
+           android:contentDescription="@string/separator_description"
+           android:padding="5dp"
+           android:src="@raw/line_separator" />
+       
+        <!-- server layout -->
+       <TextView
+           	android:layout_width="wrap_content"
+           	android:layout_height="wrap_content"
+           	android:text="@string/sett_server_desk"
+          	android:textAppearance="?android:attr/textAppearanceMedium"
+          	android:textStyle="italic"
+          	android:paddingLeft="5dp" />
+
+       <TableLayout
+           	android:layout_width="match_parent"
+           	android:layout_height="wrap_content"
+           	android:orientation="vertical" 
+           	android:paddingLeft="30dp"
+           	android:gravity="center_horizontal">
+
+           	<TableRow
+               	android:layout_width="wrap_content"
+               	android:layout_height="wrap_content" >
+               	<TextView
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:text="@string/sett_server_ip"
+               		android:textAppearance="?android:attr/textAppearanceSmall" />
+
+               	<EditText
+                   	android:id="@+id/editText_ip"
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:ems="10"
+                   	android:inputType="text" />
+           </TableRow>
+			
+           <TableRow
+               	android:layout_width="wrap_content"
+               	android:layout_height="wrap_content" >
+
+               	<TextView
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:text="@string/sett_server_port"
+                   	android:textAppearance="?android:attr/textAppearanceSmall" />
+
+               	<EditText
+                   	android:id="@+id/editText_desk_port"
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:ems="10"
+                   	android:inputType="number" />
+           </TableRow>
+       </TableLayout>
+</LinearLayout>

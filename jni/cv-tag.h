@@ -24,8 +24,8 @@ extern "C" {
 #endif
 
 struct Tag {
-	int x;
-	int y;
+	float x;
+	float y;
 	std::string code;
 };
 

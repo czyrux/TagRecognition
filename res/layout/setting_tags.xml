@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <TextView
+           	android:layout_width="wrap_content"
+           	android:layout_height="wrap_content"
+           	android:text="@string/sett_tag_section"
+          	android:textAppearance="?android:attr/textAppearanceMedium" 
+          	android:textStyle="italic"
+          	android:padding="5dp"/>
+       
+     	<TableLayout
+           	android:layout_width="match_parent"
+           	android:layout_height="wrap_content"
+           	android:orientation="vertical" 
+           	android:paddingLeft="30dp">
+
+           	<TableRow
+               	android:layout_width="wrap_content"
+               	android:layout_height="wrap_content" >
+
+               	<TextView
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:text="@string/sett_tag_rows"
+                   	android:textAppearance="?android:attr/textAppearanceSmall" />
+
+               	<EditText
+                   	android:id="@+id/editText_rows"
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:ems="10"
+                   	android:inputType="number" />
+           </TableRow>
+			
+           <TableRow
+               	android:layout_width="wrap_content"
+               	android:layout_height="wrap_content" >
+
+               	<TextView
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:text="@string/sett_tag_cols"
+                   	android:textAppearance="?android:attr/textAppearanceSmall" />
+
+               	<EditText
+                   	android:id="@+id/editText_cols"
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:ems="10"
+                   	android:inputType="number" />
+           </TableRow>
+           <TableRow
+               	android:layout_width="wrap_content"
+               	android:layout_height="wrap_content" >
+
+               	<TextView
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:text="@string/sett_tag_height"
+                   	android:textAppearance="?android:attr/textAppearanceSmall" />
+
+               	<EditText
+                   	android:id="@+id/editText_height"
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:ems="10"
+                   	android:inputType="numberDecimal" />
+           </TableRow>
+           <TableRow
+               	android:layout_width="wrap_content"
+               	android:layout_height="wrap_content" >
+
+               	<TextView
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:text="@string/sett_tag_width"
+                   	android:textAppearance="?android:attr/textAppearanceSmall" />
+
+               	<EditText
+                   	android:id="@+id/editText_width"
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:ems="10"
+                   	android:inputType="numberDecimal" />
+           </TableRow>
+           <TableRow
+               	android:layout_width="wrap_content"
+               	android:layout_height="wrap_content" >
+
+               	<TextView
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:text="@string/sett_tag_border"
+                   	android:textAppearance="?android:attr/textAppearanceSmall" />
+
+               	<EditText
+                   	android:id="@+id/editText_border"
+                   	android:layout_width="wrap_content"
+                   	android:layout_height="wrap_content"
+                   	android:ems="10"
+                   	android:inputType="numberDecimal" />
+           </TableRow>
+       </TableLayout>
+    
+
+</LinearLayout>

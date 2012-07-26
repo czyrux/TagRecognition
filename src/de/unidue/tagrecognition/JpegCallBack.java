@@ -39,8 +39,11 @@ public class JpegCallBack implements PictureCallback {
 
 		// Read the stream of data
 		BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inSampleSize = 4; // make the picture 1/4 of size
-		// options.inSampleSize = 2;
+		if (_activity._currentAction == Actions.SENDING_VIEW)
+			options.inSampleSize = 2; // make the picture 1/2 of size
+		else
+			options.inSampleSize = 4; // make the picture 1/4 of size
+
 		Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length,
 				options);
 
@@ -62,7 +65,7 @@ public class JpegCallBack implements PictureCallback {
 			_activity.initialState();
 		}
 		if (_activity._currentAction == Actions.SENDING_VIEW) {
-			_activity.processView(data);
+			_activity.processView(bmp);
 			// return to initial state
 			_activity.initialState();
 		}
@@ -90,15 +93,14 @@ public class JpegCallBack implements PictureCallback {
 			_activity._working = false;
 		}
 	}
-	
+
 	@SuppressWarnings("unused")
 	private void storeBitmap(Bitmap bmp, String head) {
 		int quality = 100;
 
 		File pictureFile = getOutputMediaFile(head);
 		if (pictureFile == null) {
-			Log.d(TAG,
-					"Error creating media file, check storage permissions: ");
+			Log.d(TAG, "Error creating media file, check storage permissions: ");
 			return;
 		}
 		// Store the image
