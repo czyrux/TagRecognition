@@ -198,47 +198,47 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
     cv::Mat img (data->rImage,false); //NOT COPY OF IMAGE
     cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
     
-    //find squares on image
-    std::vector<Square> squares = findSquares(img);
+    //find rectangles on image
+    std::vector<Rect> rect = findRect(img);
 
     //log
     std::stringstream os;
     if (DEBUG_TAG) {
-        os << "Square found before: " << squares.size() ;
+        os << "Square found before: " << rect.size() ;
     }
     
-    //remove squares inside others ones
-    filterSquares(squares);
+    //remove rectangles inside others ones
+    filterRect(rect);
 
     //log
     if (DEBUG_TAG) {
-        os << " later: " << squares.size() ;
+        os << " later: " << rect.size() ;
         LOGI(os.str().c_str());
     }
 
-    //cut squares
-    std::vector<std::vector<cv::Mat> > subsquares = cutSquares(data,squares);
+    //cut and deskew rectangles
+    std::vector<std::vector<cv::Mat> > subrect = cutRect(data,rect);
 
-    //recognize tag's codes in squares
-    std::vector<std::string> codes = decodeTags(subsquares , oriented );
+    //recognize tag's codes in rectangles
+    std::vector<std::string> codes = decodeTags(subrect , oriented );
 
     //build tags
     Tag aux;
     for ( int i=0 ; i<codes.size() ; i++ ) {
-        aux.x = (squares[i].rect.center.x * 100 ) / img.cols;
-        aux.y = (squares[i].rect.center.y * 100 ) / img.rows;
+        aux.x = (rect[i].bounding_box.center.x * 100 ) / img.cols;
+        aux.y = (rect[i].bounding_box.center.y * 100 ) / img.rows;
         aux.code = codes[i];
         tags.push_back(aux);
     }
 
     if (DEBUG_TAG) {
-        //draw the squares founded and store them
-        drawSquares(img_org, squares);
+        //draw the rectangles founded and store them
+        drawRect(img_org, rect);
         std::string file = ANDROID_PATH + "src_squares.jpeg";
         cv::imwrite(file,img_org);
     }
     
-    //return the image with the squares
+    //return the image with the rectangles
     //return getBmpImage(env,&img_org.operator IplImage());
     
     //return tags founded
@@ -247,7 +247,7 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
 
 /**************************************/
 
-void adjustRGBBoundaries(std::string readed ,std::string original) 
+void adjustRGBThreshold(std::string readed ,std::string original) 
 {
     //boolean's values who represent if the color had been good detected
     short r = 0 , b = 0 , g = 0;
@@ -289,15 +289,15 @@ void adjustRGBBoundaries(std::string readed ,std::string original)
 
     //adjust incorrect values
     if (r) {
-        RED_BOUNDARY -= r * 5;
+        RED_THRESHOLD -= r * 5;
         if (DEBUG_TAG) LOGI("Adjust red");
     }
     if (b) {
-        BLUE_BOUNDARY -= b * 5;
+        BLUE_THRESHOLD -= b * 5;
         if (DEBUG_TAG) LOGI("Adjust blue");
     } 
     if (g) {
-        GREEN_BOUNDARY -= g * 7;
+        GREEN_THRESHOLD -= g * 7;
         if (DEBUG_TAG) LOGI("Adjust green");
     }
 

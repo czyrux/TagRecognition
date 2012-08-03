@@ -8,7 +8,7 @@
 #include <cv.h>
 
 #include "cv-image.h"
-#include "cv-squares.h"
+#include "cv-rect.h"
 #include "cv-tag.h"
 #include "cv-log.h"
 
@@ -140,10 +140,10 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
         jint height) 
 {
     //Backups of old values
-    int backUpR = RED_BOUNDARY , backUpB = BLUE_BOUNDARY, backUpG = GREEN_BOUNDARY;
+    int backUpR = RED_THRESHOLD, backUpB = BLUE_THRESHOLD, backUpG = GREEN_THRESHOLD;
 
-    //Initialize values of boundaries
-    RED_BOUNDARY = BLUE_BOUNDARY = GREEN_BOUNDARY = 0;
+    //Initialize values of threshold
+    RED_THRESHOLD = BLUE_THRESHOLD = GREEN_THRESHOLD = 0;
 
     bool exit_ = false;
     bool calibrated = false;
@@ -174,25 +174,25 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
             }
             else {
                 //adjust values of boundaries
-                adjustRGBBoundaries(tag,TEMPLATE_TAG);
+                adjustRGBThreshold(tag,TEMPLATE_TAG);
             }
             
         }else {
-            RED_BOUNDARY -= 10; //adjust to find red border
-            BLUE_BOUNDARY -= 5; //or to find the blue square
+            RED_THRESHOLD -= 10; //adjust to find red border
+            BLUE_THRESHOLD -= 5; //or to find the blue square
         }
 
         //condition of exit
-        if (RED_BOUNDARY <= - 100 || BLUE_BOUNDARY <= -100 || GREEN_BOUNDARY <= -100 ) {
+        if (RED_THRESHOLD <= - 100 || BLUE_THRESHOLD <= -100 || GREEN_THRESHOLD <= -100 ) {
             exit_ = true;
             //Restore original values
-            RED_BOUNDARY = backUpR;
-            BLUE_BOUNDARY = backUpB;
-            GREEN_BOUNDARY = backUpG;
+            RED_THRESHOLD = backUpR;
+            BLUE_THRESHOLD= backUpB;
+            GREEN_THRESHOLD = backUpG;
         } 
 
         //log
-        os << "itr: " << i << " | R: " << RED_BOUNDARY << " | G: " << GREEN_BOUNDARY << " | B: " << BLUE_BOUNDARY << " |";
+        os << "itr: " << i << " | R: " << RED_THRESHOLD << " | G: " << GREEN_THRESHOLD << " | B: " << BLUE_THRESHOLD << " |";
         i++;
         LOGI(os.str().c_str());
         

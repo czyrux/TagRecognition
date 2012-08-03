@@ -101,7 +101,7 @@ obj/local/armeabi/objs/tagrecognizer-jni/cv-tagRecognizer.o: \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv/cxcore.h \
  jni/cv-log.h \
  /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h \
- jni/cv-squares.h jni/cv-tag.h
+ jni/cv-rect.h jni/cv-tag.h
 
 /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/jni.h:
 
@@ -305,6 +305,6 @@ jni/cv-log.h:
 
 /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h:
 
-jni/cv-squares.h:
+jni/cv-rect.h:
 
 jni/cv-tag.h:

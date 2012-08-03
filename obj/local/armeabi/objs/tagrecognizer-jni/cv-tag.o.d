@@ -99,7 +99,7 @@ obj/local/armeabi/objs/tagrecognizer-jni/cv-tag.o: jni/cv-tag.cpp \
  /Users/czyrux/android-opencv/OpenCV-2.4.0/share/OpenCV/../../include/opencv2/highgui/highgui_c.h \
  jni/cv-log.h \
  /Users/czyrux/android-ndk/platforms/android-8/arch-arm/usr/include/android/log.h \
- jni/cv-image.h jni/cv-squares.h
+ jni/cv-image.h jni/cv-rect.h
 
 jni/cv-tag.h:
 
@@ -303,4 +303,4 @@ jni/cv-log.h:
 
 jni/cv-image.h:
 
-jni/cv-squares.h:
+jni/cv-rect.h:

@@ -2,9 +2,9 @@
 
 /**************************************/
 
-int RED_BOUNDARY = -10;
-int BLUE_BOUNDARY = -20;
-int GREEN_BOUNDARY = -60;
+int RED_THRESHOLD = -10;
+int BLUE_THRESHOLD = -20;
+int GREEN_THRESHOLD = -60;
 
 /**************************************/
 Image_data* loadPixelsFiltered(int* pixels, int width, int height,
@@ -40,21 +40,21 @@ Image_data* loadPixelsFiltered(int* pixels, int width, int height,
 			if ( red_filter ) {
 				diff = R - (G+B);
 				((uchar *)(img_red->imageData + y*img_red->widthStep))[x] 
-				= (diff > RED_BOUNDARY)? 0x00 : 0xFF ; //black : white
+				= (diff > RED_THRESHOLD)? 0x00 : 0xFF ; //black : white
 			}
 			
 			//to take GREEN colours
 			if ( green_filter ) {
 				diff = G - (R+B);
 				((uchar *)(img_green->imageData + y*img_green->widthStep))[x] 
-				= ( diff > GREEN_BOUNDARY )? 0x00 : 0xFF ; //black : white
+				= ( diff > GREEN_THRESHOLD )? 0x00 : 0xFF ; //black : white
 			}
 			
 			//to take BLUE colours
 			if ( blue_filter ) {
 				diff = B - (G+R);
 				((uchar *)(img_blue->imageData + y*img_blue->widthStep))[x]= 
-				( diff > BLUE_BOUNDARY )? 0x00 : 0xFF ; //black : white
+				( diff > BLUE_THRESHOLD )? 0x00 : 0xFF ; //black : white
 			}
 		}
 	}

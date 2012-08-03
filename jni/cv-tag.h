@@ -7,7 +7,7 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "cv-log.h"
 #include "cv-image.h"
-#include "cv-squares.h"
+#include "cv-rect.h"
 
 #define COLS 4
 #define ROWS 2
@@ -39,7 +39,7 @@ inline bool validTag (std::string tag );
 
 void orientedTag ( std::vector<std::vector<int> > &v );
 
-void adjustRGBBoundaries(std::string readed ,std::string original );
+void adjustRGBThreshold(std::string readed ,std::string original );
 
 #ifdef __cplusplus
 }

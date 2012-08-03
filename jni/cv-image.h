@@ -11,9 +11,9 @@
 extern "C" {
 #endif
 
-extern int RED_BOUNDARY;
-extern int BLUE_BOUNDARY;
-extern int GREEN_BOUNDARY;
+extern int RED_THRESHOLD;
+extern int BLUE_THRESHOLD;
+extern int GREEN_THRESHOLD;
 
 struct bmpfile_header {
   unsigned char magic[2];
