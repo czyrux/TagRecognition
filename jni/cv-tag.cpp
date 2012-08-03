@@ -1,7 +1,5 @@
 #include "cv-tag.h"
 
-std::string PATH = "/mnt/sdcard/Pictures/TagRecognizerApp/";
-
 /**************************************/
 
 std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& subsquares , bool oriented ) 
@@ -138,7 +136,7 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index , bool
     if (DEBUG_TAG) {
         //store image with points
         std::stringstream file;
-        file << PATH + "points_" << index << ".jpeg";
+        file << ANDROID_PATH + "points_" << index << ".jpeg";
         cv::imwrite(file.str().c_str(),img);
     
         LOGI(".... DONE");
@@ -184,13 +182,13 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
     
     if ( DEBUG_TAG ) {
         cv::Mat img1 (data->src,false) , img2 (data->rImage,false) , img3 (data->bImage,false) , img4 (data->gImage,false); //NOT COPY OF IMAGE
-        std::string file1 = PATH + "filter_src.jpeg";
-        //cv::imwrite(file1,img1);
-        file1 = PATH + "filter_red.jpeg";
+        std::string file1 = ANDROID_PATH + "filter_src.jpeg";
+        cv::imwrite(file1,img1);
+        file1 = ANDROID_PATH + "filter_red.jpeg";
         cv::imwrite(file1,img2);
-        file1 = PATH + "filter_green.jpeg";
+        file1 = ANDROID_PATH + "filter_green.jpeg";
         cv::imwrite(file1,img4);
-        file1 =  PATH + "filter_blue.jpeg";
+        file1 =  ANDROID_PATH + "filter_blue.jpeg";
         cv::imwrite(file1,img3);
     }
     
@@ -236,7 +234,7 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
     if (DEBUG_TAG) {
         //draw the squares founded and store them
         drawSquares(img_org, squares);
-        std::string file = PATH + "src_squares.jpeg";
+        std::string file = ANDROID_PATH + "src_squares.jpeg";
         cv::imwrite(file,img_org);
     }
     

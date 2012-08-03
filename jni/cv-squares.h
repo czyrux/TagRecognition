@@ -17,6 +17,8 @@ extern "C" {
 #define WIDTH_BORDER 1/8. //1/9.5
 #define HEIGHT_BORDER 1/4.5
 
+#define DEBUG_SQUARES true
+
 /**************************************/
 
 /**
@@ -24,8 +26,8 @@ extern "C" {
  * of a square/rectangle inside of a image.
  */
 struct Square {
-    cv::RotatedRect rect;
-    cv::Rect frame;
+    cv::RotatedRect rect;//bounding_box
+    cv::Rect frame;//wrapper_box
     std::vector<cv::Point> points;
 };
 

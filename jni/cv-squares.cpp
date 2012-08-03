@@ -143,11 +143,19 @@ std::vector<std::vector<cv::Mat> > cutSquares(const Image_data* src, const std::
     cv::Mat rImage (src->rImage,false) , gImage (src->gImage,false) , bImage (src->bImage,false)
             , img (src->src,false);
 
+    std::string file;
+    //log
+    if (DEBUG_SQUARES) {
+        file = ANDROID_PATH + "cut_img.jpeg";
+        cv::imwrite(file,img);
+    }
+    
+
     //erode images
     //cv::erode(gImage, gImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
     //cv::erode(bImage, bImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
 
-    //Cut the squares
+    //Cut and deskew squares
     for ( int i=0 ; i < sq.size() ; i++ ) 
     {
         //Submatrix to fill
@@ -163,38 +171,48 @@ std::vector<std::vector<cv::Mat> > cutSquares(const Image_data* src, const std::
         //adjust the angle from "http://felix.abecassis.me/2011/10/opencv-rotation-deskewing/"
         if (angle < -45.) {
             angle += 90.;
-            std::swap(box_size.width, box_size.height);
+            std::swap(box_size.width, box_size.height); // for cropping
         }
-
-        //log
-        //std::stringstream os;
-        //os << "Square : " << i << " --->alpha:"<< angle;
 
         //rotation
         if ( std::abs(angle) > LIMIT_ROTATION ) {
+            
             // matrices we'll use
             cv::Mat rotatedR , rotatedG , rotatedB , rot_mat , rotated;
-
-            //Rotation. Same rotation for all
+            
+            //Rotation Matrix. Same rotation for all
             rot_mat = cv::getRotationMatrix2D(sq[i].rect.center, angle, 1);
-            cv::warpAffine(rImage, rotatedR, rot_mat, rImage.size(), cv::INTER_CUBIC); // apply the geometric transformation
-            cv::warpAffine(gImage, rotatedG, rot_mat, gImage.size(), cv::INTER_CUBIC);
-            cv::warpAffine(bImage, rotatedB, rot_mat, bImage.size(), cv::INTER_CUBIC);
-            cv::warpAffine(img, rotated, rot_mat, img.size(), cv::INTER_CUBIC);
+            
+            //Apply transformation
+            cv::warpAffine(rImage, rotatedR, rot_mat, rImage.size(), cv::INTER_LINEAR); // apply the geometric transformation
+            cv::warpAffine(gImage, rotatedG, rot_mat, gImage.size(), cv::INTER_LINEAR);
+            cv::warpAffine(bImage, rotatedB, rot_mat, bImage.size(), cv::INTER_LINEAR);//INTER_CUBIC
+            cv::warpAffine(img   , rotated, rot_mat, img.size(), cv::INTER_LINEAR);
+            
+            //log
+            if (DEBUG_SQUARES) {
+                file = ANDROID_PATH + "cut_subimg_rot.jpeg";
+                cv::imwrite(file,rotated);
+            }
 
             //Cropped image
             cv::getRectSubPix(rotatedR, box_size, sq[i].rect.center, subimg_red);
             cv::getRectSubPix(rotatedG, box_size, sq[i].rect.center, subimg_green);
             cv::getRectSubPix(rotatedB, box_size, sq[i].rect.center, subimg_blue);
-            cv::getRectSubPix(rotated, box_size, sq[i].rect.center, subimg);
+            cv::getRectSubPix(rotated, box_size , sq[i].rect.center, subimg);
             
-            //os << "_rotated";
+            //log
+            if (DEBUG_SQUARES) {
+                file = ANDROID_PATH + "cut_subimg_crop.jpeg";
+                cv::imwrite(file,subimg);
+            }
+            
         }
         else {//just cut it
             subimg_red   = rImage(sq[i].frame);
             subimg_green = gImage(sq[i].frame); 
             subimg_blue  = bImage(sq[i].frame);
-            subimg = img(sq[i].frame);
+            subimg       = img(sq[i].frame);
         }     
         
         //remove border of tag
@@ -203,25 +221,19 @@ std::vector<std::vector<cv::Mat> > cutSquares(const Image_data* src, const std::
         removeBorder(subimg_blue);
         removeBorder(subimg);
 
+        //log
+        if (DEBUG_SQUARES) {
+            file = ANDROID_PATH + "cut_subimg_borderRemoved.jpeg";
+            cv::imwrite(file,subimg);
+        }
+
         //add subimages
         aux.push_back(subimg_red);//R
         aux.push_back(subimg_green);//G
         aux.push_back(subimg_blue);//B
         aux.push_back(subimg);//SRC
 
-        subsquares.push_back(aux);
-        
-        //log
-        //LOGI(os.str().c_str());
-        
-        //Write image
-        /*std::stringstream os1;
-        os1 << "_" << i ;
-        for ( int j=0 ; j<3 ;j++) {
-            os1 << "_" << j ;
-            std::string file = "/mnt/sdcard/Pictures/MyCameraApp/squares" + os1.str() + ".jpeg";
-            cv::imwrite(file,subsquares[i][j]);
-        }*/        
+        subsquares.push_back(aux);       
     }
 
     return subsquares;
