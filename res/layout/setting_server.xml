@@ -28,11 +28,11 @@
                		android:textAppearance="?android:attr/textAppearanceSmall" />
 
                	<EditText
-                   	android:id="@+id/editText_own_port"
+                   	android:id="@+id/editText_app_port"
                    	android:layout_width="wrap_content"
                    	android:layout_height="wrap_content"
                    	android:ems="10"
-                   	android:inputType="text" />
+                   	android:inputType="number" />
            </TableRow>
     </TableLayout>
         <ImageView

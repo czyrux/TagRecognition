@@ -34,7 +34,7 @@ void envDump(JNIEnv *env) {
 
 /**************************************/
 /*
-JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNIEnv* env, jobject thiz) 
+JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_NDKWrapper_variablesSetup (JNIEnv* env, jobject thiz) 
 {
 
     //Taking reference to the class
@@ -76,9 +76,6 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_JniWrapper_nativeSetup (JNI
  
     
     //Update the values to java
-    RED_BOUNDARY = 0;
-    BLUE_BOUNDARY = -20;
-    GREEN_BOUNDARY = -60;
     env->SetIntField(thiz, rId, RED_BOUNDARY);
     env->SetIntField(thiz, gId, GREEN_BOUNDARY);
     env->SetIntField(thiz, bId, BLUE_BOUNDARY);

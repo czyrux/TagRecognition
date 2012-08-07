@@ -25,12 +25,17 @@ import android.util.Log;
 @SuppressWarnings("rawtypes")
 public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 	private static final String TAG = "SenderTags";
-	private final String HOST = "192.168.137.1";
-	private final int PORT = 8080;
+	private String HOST;// = "192.168.137.1";
+	private int PORT;// = 8080;
 	private Socket _socket = null;
 	private ObjectOutputStream _out = null;
 	private ObjectInputStream _in = null;
 
+	public DataSender (String host , int port ) {
+		HOST = host;
+		PORT = port;
+	}
+	
 	@Override
 	protected Boolean doInBackground(ArrayList... params) {
 		ArrayList objects = params[0];

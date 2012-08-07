@@ -20,11 +20,12 @@
     <string name="sett_tag_height">Height (cm):</string>
     <string name="sett_tag_width">Width (cm):</string>
     <string name="sett_tag_border">Border size(cm):</string>
+    <string name="sett_tag_template">Tag template:</string>
     
     <string name="btn_stt_accept">Save</string>
     <string name="btn_stt_cancel">Cancel</string>
     
-    <string name="sett_server_own">Own server</string>
+    <string name="sett_server_own">App server</string>
     <string name="sett_server_desk">Desktop server</string>
     <string name="sett_server_ip">IP (192.168.3.1):</string>
     <string name="sett_server_port">Port  (e.g: 8080):</string>

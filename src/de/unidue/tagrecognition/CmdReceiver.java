@@ -14,6 +14,7 @@ import android.util.Log;
 public class CmdReceiver extends IntentService {
 	private final static String TAG = "CmdReceiver";
 	public static final String CmdReceiver_IN_MSG = "imsg";
+	public static final String CmdReceiver_PORT_MSG = "port_msg";
 	public static final String CmdReceiver_OUT_MSG = "outmsg";
 	public static final int PARAM_START = 1;
 	public static final int PARAM_STOP = 2;
@@ -27,10 +28,12 @@ public class CmdReceiver extends IntentService {
 	protected void onHandleIntent(Intent intent) {
 		// Get intent value
 		int cmd = intent.getIntExtra(CmdReceiver_IN_MSG, 0);
+		int port;
 		// Select operation
 		switch (cmd) {
 		case PARAM_START:
-			runServer();
+			port = intent.getIntExtra(CmdReceiver_PORT_MSG,8000);
+			runServer(port);
 			break;
 		case PARAM_STOP:
 			stopServer();
@@ -40,9 +43,9 @@ public class CmdReceiver extends IntentService {
 		}
 	}
 
-	void runServer() {
+	void runServer( int port ) {
 		if (_server == null) {
-			_server = new ServerThread();
+			_server = new ServerThread(port);
 			Thread sf = new Thread(_server);
 			sf.start();
 		}
@@ -65,10 +68,11 @@ public class CmdReceiver extends IntentService {
 	}
 
 	public class ServerThread implements Runnable {
-		private final int SERVERPORT = 8000;
+		private int SERVERPORT = 8000;
 		private ServerSocket _serverSocket;
 
-		public ServerThread() {
+		public ServerThread( int port ) {
+			SERVERPORT = port;
 			_serverSocket = null;
 		}
 

@@ -14,7 +14,7 @@ extern "C" {
 
 #define LIMIT_ROTATION 1 //degrees
 #define MIN_RECT_SIZE 20 //size in pixels
-#define WIDTH_BORDER 1/8. //1/9.5
+#define WIDTH_BORDER 1/8.
 #define HEIGHT_BORDER 1/4.5
 
 #define DEBUG_RECT true
@@ -24,6 +24,10 @@ extern "C" {
 /**
  * Data structure used to hold information about the location
  * of rectangles inside of a image.
+ * The fields are:
+ * - points array of 2Dpoints
+ * - bounding_box minimum rotated rectangle that envolves the points
+ * - wrapper_box minimum box that involves the points
  */
 struct Rect {
     cv::RotatedRect bounding_box;

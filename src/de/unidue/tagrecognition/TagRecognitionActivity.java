@@ -13,6 +13,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.os.Bundle;
 
@@ -34,13 +35,18 @@ import android.widget.Toast;
 
 public class TagRecognitionActivity extends Activity {
 	private static final String TAG = "TagRecognizer";
-
+	public static final String PREFS_NAME = "TagRecognizerPrefs";
+	
 	public Preview _mPreview;
 	public Actions _currentAction;
 	public NDKWrapper _ndk;
 	private Timer _timer;
 	private AlertDialog _helpMenu;
-	private mCmdReceiver _notification;
+	private mReceiver _notification;
+	
+	private String _desk_IP;
+	private int _desk_Port;
+	private int _app_Port;
 	
 	private JpegCallBack _jpegCallback;
 
@@ -63,9 +69,22 @@ public class TagRecognitionActivity extends Activity {
 
 		setContentView(R.layout.main);
 
+		// Restore preferences
+	    SharedPreferences settings = getSharedPreferences(PREFS_NAME, Activity.MODE_PRIVATE);
+	    int rows = settings.getInt("rows", 2);
+		int cols = settings.getInt("cols", 4);
+		float tag_width = settings.getFloat("tag_width", 8.0f);
+		float tag_height = settings.getFloat("tag_height", 4.5f);
+		float tag_border = settings.getFloat("tag_border", 1.0f);
+		boolean debugMode = settings.getBoolean("debugMode", true);
+		String template = settings.getString("templateTag", "12321113");
+		_desk_IP = settings.getString("desk_IP", "192.168.137.1");
+		_desk_Port = settings.getInt("desk_Port", 8080);
+		_app_Port = settings.getInt("app_Port", 8000);
+		
 		// Initialization of internal variables, preview, ndk and command
 		// receiver server
-		_ndk = new NDKWrapper();
+		_ndk = new NDKWrapper(rows,cols,tag_width,tag_height,tag_border,template,debugMode);
 		_notification = null;
 		_mPreview = new Preview(this);
 		_timer = null;
@@ -110,9 +129,6 @@ public class TagRecognitionActivity extends Activity {
 		_btn_help.setOnClickListener(new View.OnClickListener() {
 			@Override
 			public void onClick(View v) {
-				// enable option buttons
-				// _btn_calibrate.setEnabled(true);
-				// _btn_radar.setEnabled(true);
 				// show alert dialog
 				createHelpMenu();
 			}
@@ -128,38 +144,13 @@ public class TagRecognitionActivity extends Activity {
 
 		// initial state
 		initialState();
-	}
-
-	
-	/**
-	 * 
-	 */
-	private void enableServer() {
-		// Create server
-		Intent i = new Intent(this, CmdReceiver.class);
-		i.putExtra(CmdReceiver.CmdReceiver_IN_MSG, CmdReceiver.PARAM_START);
-		startService(i);
-
-		// Prepare to receive notifications from service
-		_notification = new mCmdReceiver();
-		IntentFilter intentFilter = new IntentFilter(
-				CmdReceiver.CmdReceiver_OUT_MSG);
+		
+		// Prepare to receive notifications from activity and service
+		_notification = new mReceiver();
+		IntentFilter intentFilter = new IntentFilter();
+		intentFilter.addAction(SettingsActivity.SettingActivitiy_MSG);
+		intentFilter.addAction(CmdReceiver.CmdReceiver_OUT_MSG);
 		registerReceiver(_notification, intentFilter);
-	}
-
-	/**
-	 * 
-	 */
-	private void disableServer() {
-		// Unregister receiver
-		if (_notification != null) {
-			unregisterReceiver(_notification);
-			_notification = null;
-		}
-		// Stop server
-		Intent i = new Intent(this, CmdReceiver.class);
-		i.putExtra(CmdReceiver.CmdReceiver_IN_MSG, CmdReceiver.PARAM_STOP);
-		startService(i);
 	}
 
 	// Create the alert dialog with the help menu
@@ -312,7 +303,7 @@ public class TagRecognitionActivity extends Activity {
 		ArrayList<Bitmap> array = new ArrayList<Bitmap>();
 		array.add(data);
 		// Send situation of calibration
-		DataSender sender = new DataSender();
+		DataSender sender = new DataSender(_desk_IP,_desk_Port);
 		sender.execute(array);
 		// Wait end of operation
 		try {
@@ -338,7 +329,7 @@ public class TagRecognitionActivity extends Activity {
 		}
 
 		// Send situation of calibration
-		DataSender sender = new DataSender();
+		DataSender sender = new DataSender(_desk_IP,_desk_Port);
 		sender.execute(s);
 		try {
 			sender.get();
@@ -379,7 +370,7 @@ public class TagRecognitionActivity extends Activity {
 		}
 
 		// Send by net
-		DataSender sender = new DataSender();
+		DataSender sender = new DataSender(_desk_IP,_desk_Port);
 		sender.execute(tags);
 		try {
 			// wait the end the process
@@ -399,20 +390,44 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
-	public class mCmdReceiver extends BroadcastReceiver {
+	public class mReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {
 			Bundle bundle = intent.getExtras();
-			String cmd = bundle.getString(CmdReceiver.CmdReceiver_OUT_MSG);
-			if (cmd.equals(Message.CALIBRATE.toString())) {
-				functionCalibrate();
-			} else if (cmd.equals(Message.START_SEARCH.toString())) {
-				functionSearch();
-			} else if (cmd.equals(Message.STOP_SEARCH.toString())) {
-				functionStopSearch();
-			} else if (cmd.equals(Message.SEND_VIEW.toString())) {
-				functionSendView();
+			if (intent.getAction().equals(CmdReceiver.CmdReceiver_OUT_MSG)) {
+				String cmd = bundle.getString(CmdReceiver.CmdReceiver_OUT_MSG);
+				if (cmd.equals(Message.CALIBRATE.toString())) {
+					functionCalibrate();
+				} else if (cmd.equals(Message.START_SEARCH.toString())) {
+					functionSearch();
+				} else if (cmd.equals(Message.STOP_SEARCH.toString())) {
+					functionStopSearch();
+				} else if (cmd.equals(Message.SEND_VIEW.toString())) {
+					functionSendView();
+				}
 			}
+			else if (intent.getAction().equals(SettingsActivity.SettingActivitiy_MSG)) {
+				Boolean changes = bundle.getBoolean(SettingsActivity.SettingActivitiy_DATA);
+				if (changes == true ) {
+					// Restore preferences
+				    SharedPreferences settings = getSharedPreferences(PREFS_NAME, Activity.MODE_PRIVATE);
+				    int rows = settings.getInt("rows", 2);
+					int cols = settings.getInt("cols", 4);
+					float tag_width = settings.getFloat("tag_width", 8.0f);
+					float tag_height = settings.getFloat("tag_height", 4.5f);
+					float tag_border = settings.getFloat("tag_border", 1.0f);
+					boolean debugMode = settings.getBoolean("debugMode", true);
+					String template = settings.getString("templateTag", "12321113");
+					_desk_IP = settings.getString("desk_IP", "192.168.137.1");
+					_desk_Port = settings.getInt("desk_Port", 8080);
+					_app_Port = settings.getInt("app_Port", 8000);
+					
+					//update NDK
+					_ndk.updateConfParams(rows, cols, tag_width, tag_height, tag_border, template, debugMode);
+					
+				}
+			}
+			
 		}
 
 	}
@@ -452,12 +467,15 @@ public class TagRecognitionActivity extends Activity {
 		}
 		_isAlive = true;
 		_working = false;
-
+		
 		// Open server
 		if (_serverOn) {
-			enableServer();
+			Intent i = new Intent(this, CmdReceiver.class);
+			i.putExtra(CmdReceiver.CmdReceiver_IN_MSG, CmdReceiver.PARAM_START);
+			i.putExtra(CmdReceiver.CmdReceiver_PORT_MSG, _app_Port);
+			startService(i);
 		}
-
+		
 		super.onResume();
 	}
 
@@ -468,9 +486,11 @@ public class TagRecognitionActivity extends Activity {
 		}
 		_mPreview.release();
 		cleanTimer();
-
+				
 		// Close server
-		disableServer();
+		Intent i = new Intent(this, CmdReceiver.class);
+		i.putExtra(CmdReceiver.CmdReceiver_IN_MSG, CmdReceiver.PARAM_STOP);
+		startService(i);
 
 		// Reset buttons
 		initialState();
@@ -480,6 +500,12 @@ public class TagRecognitionActivity extends Activity {
 
 	@Override
 	protected void onDestroy() {
+		// Unregister receiver
+		if (_notification != null) {
+			unregisterReceiver(_notification);
+			_notification = null;
+		}
+				
 		if (_helpMenu != null) {
 			_helpMenu.cancel();
 		}
