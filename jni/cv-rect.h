@@ -7,17 +7,11 @@
 #include <opencv2/highgui/highgui.hpp>
 #include "cv-log.h"
 #include "cv-image.h"
+#include "cv-conf.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#define LIMIT_ROTATION 1 //degrees
-#define MIN_RECT_SIZE 20 //size in pixels
-#define WIDTH_BORDER 1/8.
-#define HEIGHT_BORDER 1/4.5
-
-#define DEBUG_RECT true
 
 /**************************************/
 

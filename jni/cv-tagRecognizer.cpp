@@ -11,6 +11,7 @@
 #include "cv-rect.h"
 #include "cv-tag.h"
 #include "cv-log.h"
+#include "cv-conf.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,70 +19,26 @@ extern "C" {
 
 /**************************************/
 
-const std::string TEMPLATE_TAG = "12321113";
+static std::string TEMPLATE_TAG = "12321113";
 
 /**************************************/
 
-/*
- * error reporting
- */
-void envDump(JNIEnv *env) {
-  if (env->ExceptionCheck()) {
-    env->ExceptionDescribe();
-    env->ExceptionClear();
-  }
-}
-
-/**************************************/
-/*
-JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_NDKWrapper_variablesSetup (JNIEnv* env, jobject thiz) 
+JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_NDKWrapper_setup (JNIEnv* env, jobject thiz,
+    jint rows , jint cols , jfloat tag_width, jfloat tag_height , jfloat tag_border , jstring templateT , jboolean debug) 
 {
+    //variables from conf.h
+    COLS = cols;
+    ROWS = rows;
+    WIDTH_BORDER = tag_border/tag_width;
+    HEIGHT_BORDER = tag_border/tag_height;
 
-    //Taking reference to the class
-    jclass callbackClass = env->GetObjectClass(thiz);
-    if (!callbackClass) {
-        LOGE("setup//failed to discover class");
-        envDump(env);
-        return;
-    }
-
-    //Making global reference
-    //callbackClass = (jclass) env->NewGlobalRef(tempClass);
-    //env->DeleteLocalRef(tempClass);
-
-    //Getting id's from variables
-    rId = env->GetFieldID(callbackClass, "_RED_BOUNDARY", "I");
-    if (!rId) {
-        LOGE("setup//RED_BOUNDARY find failure");
-        envDump(env);
-        return;
-    }
-    gId = env->GetFieldID(callbackClass, "_GREEN_BOUNDARY", "I");
-    if (!rId) {
-        LOGE("setup//GREEN_BOUNDARY find failure");
-        envDump(env);
-        return;
-    }
-    bId = env->GetFieldID(callbackClass, "_BLUE_BOUNDARY", "I");
-    if (!rId) {
-        LOGE("setup//BLUE_BOUNDARY find failure");
-        envDump(env);
-        return;
-    }
-
-    //Get values from Java
-    RED_BOUNDARY = (jint) env->GetObjectField(thiz, rId);
-    GREEN_BOUNDARY = (jint) env->GetObjectField(thiz, gId);
-    BLUE_BOUNDARY = (jint) env->GetObjectField(thiz, bId);
- 
-    
-    //Update the values to java
-    env->SetIntField(thiz, rId, RED_BOUNDARY);
-    env->SetIntField(thiz, gId, GREEN_BOUNDARY);
-    env->SetIntField(thiz, bId, BLUE_BOUNDARY);
-    
+    //TEMPLATE_TAG = templateT;
+    const char *s = env->GetStringUTFChars(templateT,NULL);
+    TEMPLATE_TAG=s;
+    env->ReleaseStringUTFChars(templateT,s);
+    DEBUG = debug;
 }
-*/
+
 /**************************************/
 
 
@@ -99,15 +56,6 @@ JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_NDKWrapper_tagRecognizer
     //looking for tags in the image
     std::vector<Tag> tags = findTags(data);
 
-    //LOG
-    for ( int i=0 ; i<tags.size() ; i++ ) {
-        std::stringstream os;
-        os << "x: " << tags[i].x << " y:" << tags[i].y << " code:" << tags[i].code;
-        if ( tags[i].code == "12321113" )
-            os << "----> CHECKED";
-        LOGI(os.str().c_str());
-    }
-
     //Build string to return to java
     std::stringstream stream;
     for ( int i=0 ; i<tags.size() ; i++ ) {
@@ -115,8 +63,6 @@ JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_NDKWrapper_tagRecognizer
         if ( i< tags.size()-1)
             stream << "&";
     }
-
-    //LOGI(stream.str().c_str());
 
     //release memory
     if (data->src)  cvReleaseImage(&data->src);
@@ -126,7 +72,6 @@ JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_NDKWrapper_tagRecognizer
     delete data;
 
 
-    //return NewStringUTF(env, (const jchar*)stream.str().c_str());
     return env->NewStringUTF((char*)stream.str().c_str());
 }
 
@@ -141,6 +86,11 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
 
     //Initialize values of threshold
     RED_THRESHOLD = BLUE_THRESHOLD = GREEN_THRESHOLD = 0;
+
+    if (DEBUG) {
+        LOGI("Calibrating proces...");
+        LOGI(TEMPLATE_TAG.c_str());
+    }
 
     bool exit_ = false;
     bool calibrated = false;
@@ -201,12 +151,6 @@ JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
         delete data;
     }
 
-    /*
-    //Update the values founded to java
-    env->SetIntField(thiz, rId, RED_BOUNDARY);
-    env->SetIntField(thiz, gId, GREEN_BOUNDARY);
-    env->SetIntField(thiz, bId, BLUE_BOUNDARY);
-    */
     return calibrated;
 }
 

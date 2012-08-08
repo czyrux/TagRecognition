@@ -140,16 +140,10 @@ std::vector<std::vector<cv::Mat> > cutRect(const Image_data* src, const std::vec
     subrect.clear();
 
     //Matrix's to extract the subrectangles
-    cv::Mat rImage (src->rImage,false) , gImage (src->gImage,false) , bImage (src->bImage,false)
-            , img (src->src,false);
+    cv::Mat rImage (src->rImage,false) , gImage (src->gImage,false) , bImage (src->bImage,false),img;
+    if (DEBUG) img = cv::Mat(src->src,false);
 
     std::string file;
-    //log
-    if (DEBUG_RECT) {
-        file = ANDROID_PATH + "cut_img.jpeg";
-        cv::imwrite(file,img);
-    }
-    
 
     //erode images
     //cv::erode(gImage, gImage, cv::Mat(), cv::Point(-1,-1),1); //standard call
@@ -187,10 +181,10 @@ std::vector<std::vector<cv::Mat> > cutRect(const Image_data* src, const std::vec
             cv::warpAffine(rImage, rotatedR, rot_mat, rImage.size(), cv::INTER_LINEAR); // apply the geometric transformation
             cv::warpAffine(gImage, rotatedG, rot_mat, gImage.size(), cv::INTER_LINEAR);
             cv::warpAffine(bImage, rotatedB, rot_mat, bImage.size(), cv::INTER_LINEAR);//INTER_CUBIC
-            cv::warpAffine(img   , rotated, rot_mat, img.size(), cv::INTER_LINEAR);
+            if (DEBUG) cv::warpAffine(img   , rotated, rot_mat, img.size(), cv::INTER_LINEAR);
             
             //log
-            if (DEBUG_RECT) {
+            if (DEBUG) {
                 file = ANDROID_PATH + "cut_subimg_rot.jpeg";
                 cv::imwrite(file,rotated);
             }
@@ -199,10 +193,10 @@ std::vector<std::vector<cv::Mat> > cutRect(const Image_data* src, const std::vec
             cv::getRectSubPix(rotatedR, box_size, sq[i].bounding_box.center, subimg_red);
             cv::getRectSubPix(rotatedG, box_size, sq[i].bounding_box.center, subimg_green);
             cv::getRectSubPix(rotatedB, box_size, sq[i].bounding_box.center, subimg_blue);
-            cv::getRectSubPix(rotated, box_size , sq[i].bounding_box.center, subimg);
+            if (DEBUG) cv::getRectSubPix(rotated, box_size , sq[i].bounding_box.center, subimg);
             
             //log
-            if (DEBUG_RECT) {
+            if (DEBUG) {
                 file = ANDROID_PATH + "cut_subimg_crop.jpeg";
                 cv::imwrite(file,subimg);
             }
@@ -212,17 +206,17 @@ std::vector<std::vector<cv::Mat> > cutRect(const Image_data* src, const std::vec
             subimg_red   = rImage(sq[i].wrapper_box);
             subimg_green = gImage(sq[i].wrapper_box); 
             subimg_blue  = bImage(sq[i].wrapper_box);
-            subimg       = img(sq[i].wrapper_box);
+            if (DEBUG) subimg       = img(sq[i].wrapper_box);
         }     
         
         //remove border of tag
         removeBorder(subimg_red);
         removeBorder(subimg_green);
         removeBorder(subimg_blue);
-        removeBorder(subimg);
+        if (DEBUG) removeBorder(subimg);
 
         //log
-        if (DEBUG_RECT) {
+        if (DEBUG) {
             file = ANDROID_PATH + "cut_subimg_borderRemoved.jpeg";
             cv::imwrite(file,subimg);
         }
@@ -231,7 +225,7 @@ std::vector<std::vector<cv::Mat> > cutRect(const Image_data* src, const std::vec
         aux.push_back(subimg_red);//R
         aux.push_back(subimg_green);//G
         aux.push_back(subimg_blue);//B
-        aux.push_back(subimg);//SRC
+        if (DEBUG) aux.push_back(subimg);//SRC
 
         subrect.push_back(aux);       
     }

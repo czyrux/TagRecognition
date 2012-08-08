@@ -8,6 +8,7 @@ import java.util.concurrent.ExecutionException;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -42,6 +43,7 @@ public class TagRecognitionActivity extends Activity {
 	public NDKWrapper _ndk;
 	private Timer _timer;
 	private AlertDialog _helpMenu;
+	private ProgressDialog _progress;
 	private mReceiver _notification;
 	
 	private String _desk_IP;
@@ -201,9 +203,7 @@ public class TagRecognitionActivity extends Activity {
 
 	public void functionCalibrate() {
 		if (_currentAction == Actions.NONE) {
-			Toast.makeText(TagRecognitionActivity.this,
-					"Calibrating params. It can take a while",
-					Toast.LENGTH_SHORT).show();
+			_progress = ProgressDialog.show(TagRecognitionActivity.this,"", "Calibrating. It can take a while...",true);
 			// Adjust buttons
 			_btn_calibrate.setEnabled(false);
 			_btn_radar.setEnabled(false);
@@ -316,6 +316,7 @@ public class TagRecognitionActivity extends Activity {
 	}
 
 	protected void processCalibrationResult(boolean success) {
+		_progress.dismiss();
 		ArrayList<String> s = new ArrayList<String>();
 		if (success) {
 			s.add(Message.CALIBRATION_OK.toString());

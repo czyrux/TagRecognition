@@ -44,13 +44,13 @@ bool checkPoint ( const cv::Mat& image , int y , int x , uchar colour ) {
 
 std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index , bool oriented ) {
 	std::string tag;
-    if (DEBUG_TAG) {
+    if (DEBUG) {
 	   LOGI("DECODING...");
     }
 
     //Matrix's for the three spaces of colour
-	cv::Mat rImage = subsquares[0] , gImage = subsquares[1] , bImage = subsquares[2] ,
-    img = subsquares[3];
+	cv::Mat rImage = subsquares[0] , gImage = subsquares[1] , bImage = subsquares[2] , img;
+    if (DEBUG) img = subsquares[3];
 	//CONSTANT FOR TAGS
 	int cols = COLS , rows = ROWS;
 
@@ -87,17 +87,16 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index , bool
         	else
         		v[i][j] = DEFAULT_VALUE;
 
-        	cv::Point p(x,y); //(x,y)
-            if (x<rImage.cols && y<rImage.rows)
-                cv::circle(img, p , 1, cv::Scalar(0,255,255),1,CV_AA);
-        	//cv::circle(rImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
-        	//cv::circle(gImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
-			//cv::circle(bImage, p , 3, cv::Scalar(0,0,255),1,CV_AA);
+            if (DEBUG) {
+        	   cv::Point p(x,y); //(x,y)
+                if (x<rImage.cols && y<rImage.rows)
+                    cv::circle(img, p , 1, cv::Scalar(0,255,255),1,CV_AA);
+            }
     	}
 	}
 
 	//Print matrix
-    if (DEBUG_TAG) {
+    if (DEBUG) {
         LOGI("Tag Readed");
 	   for ( int i=0 ; i<v.size() ; i++ ) {
 	       std::stringstream os;
@@ -114,7 +113,7 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index , bool
     }
 
     //Print matrix
-    if (DEBUG_TAG) {
+    if (DEBUG) {
         LOGI("Oriented");
         for ( int i=0 ; i<v.size() ; i++ ) {
             std::stringstream os;
@@ -133,7 +132,7 @@ std::string decodeTag (const std::vector<cv::Mat>& subsquares , int index , bool
         }
     tag = os.str();
 
-    if (DEBUG_TAG) {
+    if (DEBUG) {
         //store image with points
         std::stringstream file;
         file << ANDROID_PATH + "points_" << index << ".jpeg";
@@ -180,7 +179,7 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
     std::vector<Tag> tags;
     tags.clear();
     
-    if ( DEBUG_TAG ) {
+    if ( DEBUG ) {
         cv::Mat img1 (data->src,false) , img2 (data->rImage,false) , img3 (data->bImage,false) , img4 (data->gImage,false); //NOT COPY OF IMAGE
         std::string file1 = ANDROID_PATH + "filter_src.jpeg";
         cv::imwrite(file1,img1);
@@ -196,14 +195,13 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
 
     //Convert IplImage to Mat
     cv::Mat img (data->rImage,false); //NOT COPY OF IMAGE
-    cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
     
     //find rectangles on image
     std::vector<Rect> rect = findRect(img);
 
     //log
     std::stringstream os;
-    if (DEBUG_TAG) {
+    if (DEBUG) {
         os << "Square found before: " << rect.size() ;
     }
     
@@ -211,7 +209,7 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
     filterRect(rect);
 
     //log
-    if (DEBUG_TAG) {
+    if (DEBUG) {
         os << " later: " << rect.size() ;
         LOGI(os.str().c_str());
     }
@@ -231,8 +229,9 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
         tags.push_back(aux);
     }
 
-    if (DEBUG_TAG) {
+    if (DEBUG) {
         //draw the rectangles founded and store them
+        cv::Mat img_org (data->src,false); //NOT COPY OF IMAGE
         drawRect(img_org, rect);
         std::string file = ANDROID_PATH + "src_squares.jpeg";
         cv::imwrite(file,img_org);
@@ -256,25 +255,18 @@ void adjustRGBThreshold(std::string readed ,std::string original)
     //check wich values are incorrect
     for ( int i=0 ; i<readed.size() ; i++ ) {
         std::stringstream os;
-        if (DEBUG_TAG) os << "compared:" <<  readed[i] << " y " << original[i];
+        if (DEBUG) os << "compared:" <<  readed[i] << " y " << original[i];
         if ( readed[i] != original[i] ) {   
             switch(original[i]) {
                 case '1':
-                    if (DEBUG_TAG) os << " fallo rojo"; 
                     r += desc; //it should have been red, but we didn't detect it
-                    //if we confused one color for another, up the color wrong
-                    /*if ( readed[i] == '2' ) b += -desc;
-                    if ( readed[i] == '3' ) g += -desc;*/
                     break;
                 case '2':
-                    if (DEBUG_TAG) os << " fallo azul";
                     b += desc; //it should have been blue, but we didn't detect it
                     //if we confused one color for another, up the color wrong
-                    //if ( readed[i] == '1' ) r += -desc;
-                    //if ( readed[i] == '3' ) g += -desc;
+                    if ( readed[i] == '1' ) r += -desc;
                     break;
                 case '3':
-                    if (DEBUG_TAG) os << " fallo verde";
                     g += desc; //it should have been green, but we didn't detect it
                     //if we confused one color for another, up the color wrong
                     if ( readed[i] == '1' ) r -= desc;
@@ -290,15 +282,12 @@ void adjustRGBThreshold(std::string readed ,std::string original)
     //adjust incorrect values
     if (r) {
         RED_THRESHOLD -= r * 5;
-        if (DEBUG_TAG) LOGI("Adjust red");
     }
     if (b) {
         BLUE_THRESHOLD -= b * 5;
-        if (DEBUG_TAG) LOGI("Adjust blue");
     } 
     if (g) {
         GREEN_THRESHOLD -= g * 7;
-        if (DEBUG_TAG) LOGI("Adjust green");
     }
 
 }

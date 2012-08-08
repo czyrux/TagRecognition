@@ -18,13 +18,15 @@ Image_data* loadPixelsFiltered(int* pixels, int width, int height,
 	if(red_filter) 	img_red 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
 	if(green_filter)img_green 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1); 
 	if(blue_filter) img_blue 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
-	img = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
-	base = (uchar*) (img->imageData);
+	if (DEBUG) {
+		img = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
+		base = (uchar*) (img->imageData);
+	}
 
 	//Get pixels
 	for (int y = 0; y < height; y++) 
 	{
-		ptr = base + y * img->widthStep;
+		if (DEBUG) ptr = base + y * img->widthStep;
 		for (int x = 0; x < width; x++) 
 		{
 			B = pixels[x + y * width] & 0xFF;
@@ -32,9 +34,11 @@ Image_data* loadPixelsFiltered(int* pixels, int width, int height,
 			R = pixels[x + y * width] >> 16 & 0xFF;
 
 			//Normal image
-			ptr[3 * x] = B;// blue
-			ptr[3 * x + 1] = G;// green
-			ptr[3 * x + 2] = R;// red
+			if (DEBUG) {
+				ptr[3 * x] = B;// blue
+				ptr[3 * x + 1] = G;// green
+				ptr[3 * x + 2] = R;// red
+			}
 			
 			//to take RED colours, have more Red than Green and Blue together
 			if ( red_filter ) {
@@ -103,7 +107,7 @@ Image_data* getIplImageFromIntArray(JNIEnv* env, jintArray array_data , int widt
 	//Digitalize image
 	Image_data* img = loadPixelsFiltered(pixels, width, height);
 	env->ReleaseIntArrayElements(array_data, pixels, 0);
-	if (img->src == NULL) {
+	if (img->rImage == NULL) {
 		LOGE("Error loading pixel array.");
 		return 0;
 	}

@@ -8,20 +8,16 @@
 #include "cv-log.h"
 #include "cv-image.h"
 #include "cv-rect.h"
+#include "cv-conf.h"
 
-#define COLS 4
-#define ROWS 2
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 #define RED_VALUE 1
 #define BLUE_VALUE 2
 #define GREEN_VALUE 3
 #define DEFAULT_VALUE 0
-
-#define DEBUG_TAG true
-
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 struct Tag {
 	float x;
