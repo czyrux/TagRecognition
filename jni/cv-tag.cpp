@@ -19,7 +19,7 @@ std::vector<std::string> decodeTags (const std::vector<std::vector<cv::Mat> >& s
 
 /**************************************/
 
-bool validTag ( std::string tag ) {
+bool validTag (const  std::string &tag ) {
     /* VALID FORMAT
         [1]  ... [2]
           .   .  .
@@ -246,7 +246,7 @@ std::vector<Tag> findTags (const Image_data* data , bool oriented )
 
 /**************************************/
 
-void adjustRGBThreshold(std::string readed ,std::string original) 
+void adjustRGBThreshold(const std::string &readed ,const std::string &original) 
 {
     //boolean's values who represent if the color had been good detected
     short r = 0 , b = 0 , g = 0;

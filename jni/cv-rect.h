@@ -69,7 +69,7 @@ std::vector<std::vector<cv::Mat> > cutRect( const Image_data* src,
 												const std::vector<Rect>& rect);
 
 /**
- * Remove border from squares. Use the proportion of WIDTH_BORDER and HEIGHT_BORDER.
+ * Remove border from image. Use the proportion of WIDTH_BORDER and HEIGHT_BORDER.
  * Used in the process of cutRect.
  */
 void removeBorder ( cv::Mat & img ); 

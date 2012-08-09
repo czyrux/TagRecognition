@@ -44,7 +44,7 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		p.setPictureSize(p.getSupportedPictureSizes().get(pos).width, p
 				.getSupportedPictureSizes().get(pos).height);
 
-		Log.d(TAG, "Focus mode: " + p.getFocusMode());
+		//Log.d(TAG, "Focus mode: " + p.getFocusMode());
 		Log.d(TAG, "Picture size choosen: " + p.getPictureSize().height + "x"
 				+ p.getPictureSize().width);
 		mCamera.setParameters(p);
