@@ -1,3 +1,10 @@
+/**
+ * @file cv-tagRecognizer.h
+ * @brief Implementation of native methods to be called from Java.
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
+
 #include <jni.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -19,10 +26,23 @@ extern "C" {
 
 /**************************************/
 
+/** 
+ * Template code for calibrating tags.
+ * It represent the following tag:
+ * 1 2 3 2
+ * 1 1 1 3
+ */
 static std::string TEMPLATE_TAG = "12321113";
 
 /**************************************/
 
+/**
+ * Native method to setup the configuration variables from Java.
+ * @param COLS Number of cols of a tag.
+ * @param ROWS Number of rows of a tag.
+ * @param HEIGHT_BORDER Width of horizontal border concerning to the tag height.
+ * @param WIDTH_BORDER Width of vertical border concerning to the tag width.
+ */
 JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_NDKWrapper_setup (JNIEnv* env, jobject thiz,
     jint rows , jint cols , jfloat tag_width, jfloat tag_height , jfloat tag_border , jstring templateT , jboolean debug) 
 {
@@ -41,7 +61,15 @@ JNIEXPORT void JNICALL Java_de_unidue_tagrecognition_NDKWrapper_setup (JNIEnv* e
 
 /**************************************/
 
-
+/**
+ * Native method that recognizes tags from the image passed as parameter
+ * @param photo_data Pixels of image stored as a int array.
+ * @param width Width of image.
+ * @param height Height of image.
+ * @return String with tags found. The format of string is:
+ * 0tag_x_position|0tag_y_position|0tag_code&1tag_x_position|1tag_y_position|1tag_code&...
+ * Where | separate the data of tags and & separate the different tags.
+ */
 JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_NDKWrapper_tagRecognizer(
 		JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
 		jint height) 
@@ -77,6 +105,14 @@ JNIEXPORT jstring JNICALL Java_de_unidue_tagrecognition_NDKWrapper_tagRecognizer
 
 /**************************************/
 
+/**
+ * Native method that calibrate the thresholds values used to split the image source in three
+ * channels of color.
+ * @param photo_data Pixels of image stored as a int array.
+ * @param width Width of image.
+ * @param height Height of image.
+ * @return If the calibration process has been succesful.
+ */
 JNIEXPORT jboolean JNICALL Java_de_unidue_tagrecognition_NDKWrapper_calibrate(
         JNIEnv* env, jobject thiz , jintArray photo_data, jint width,
         jint height) 

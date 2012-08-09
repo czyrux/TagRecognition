@@ -1,3 +1,11 @@
+/**
+ * @file cv-tag.h
+ * @brief Implementation of operations to find and process Tags on images. Use methods from 
+ * cv-rect.h and cv-image.h to achieve it.
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
+
 #ifndef TAG_H
 #define TAG_H
 

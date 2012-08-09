@@ -1,3 +1,11 @@
+/**
+ * @file cv-image.h
+ * @brief Implementation of operations to read and write images from Java to C++ and viceversa via
+ * JNI. It also split the image read in three channels of color.
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
+
 #ifndef IMAGE_H
 #define IMAGE_H
 
@@ -66,7 +74,6 @@ struct Image_data {
  * @param blue_filter Boolean value that indicates if the blue channel must be calculated.
  * @param green_filter Boolean value that indicates if the green channel must be calculated.
  * @return Pointer to image_data struct
- * Code based on .......
  */
 Image_data* loadPixelsFiltered(int* pixels, int width, int height , 
   bool red_filter=true , bool green_filter=true , bool blue_filter=true);

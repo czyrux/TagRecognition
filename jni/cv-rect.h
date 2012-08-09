@@ -1,3 +1,11 @@
+/**
+ * @file cv-rect.h
+ * @brief Implementation of operations to detect and process rectangles on an image using the
+ * OpenCV library.
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
+
 #ifndef RECT_H
 #define RECT_H
 
