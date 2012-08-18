@@ -15,27 +15,43 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 /**
- * 
+ * @file DataSender.java
+ * @brief Asynctask that send data to a remote server via socket.
  * @author Antonio M. Gutierrez Martinez
  * @reference Based on the code: {@link http
  *            ://stackoverflow.com/questions/5135438
  *            /example-android-bi-directional-network-socket-using-asynctask}
- * 
+ * @version 1.0
  */
 @SuppressWarnings("rawtypes")
 public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 	private static final String TAG = "SenderTags";
-	private String HOST;// = "192.168.137.1";
-	private int PORT;// = 8080;
+	/** Server Host */
+	private String HOST;
+	/** Server port */
+	private int PORT;
+	/** Socket object */
 	private Socket _socket = null;
+	/** Output stream to socket communication. */
 	private ObjectOutputStream _out = null;
+	/** Input stream to socket communication. */
 	private ObjectInputStream _in = null;
 
+	/**
+	 * Constructor
+	 * @param host Server host
+	 * @param port Server port
+	 */
 	public DataSender (String host , int port ) {
 		HOST = host;
 		PORT = port;
 	}
 	
+	/**
+	 * Send the data to the server
+	 * Process made in an indepent thread.
+	 * @return Return true if the information could be sent, false otherwise.
+	 */
 	@Override
 	protected Boolean doInBackground(ArrayList... params) {
 		ArrayList objects = params[0];
@@ -129,6 +145,11 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 		return sent;
 	}
 
+	/**
+	 * Send a Bitmap over the socket stream
+	 * @param bmp Image
+	 * @throws IOException
+	 */
 	private void sendImage( Bitmap bmp ) throws IOException {
 		ByteArrayOutputStream stream = new ByteArrayOutputStream();
 		bmp.compress(Bitmap.CompressFormat.JPEG, 100, stream);
@@ -137,6 +158,9 @@ public class DataSender extends AsyncTask<ArrayList, Void, Boolean> {
 		_out.flush();
 	}
 
+	/**
+	 * Close the socket stream if the asynctask is cancelled.
+	 */
 	@Override
 	protected void onCancelled() {
 		try {

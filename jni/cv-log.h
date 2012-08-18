@@ -1,3 +1,9 @@
+/**
+ * @file cv-log.h
+ * @brief Definition of macros that allows to access to the log mechanism in Android from C++.
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
 #ifndef LOG_H
 #define LOG_H
 

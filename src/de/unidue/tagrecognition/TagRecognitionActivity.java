@@ -34,29 +34,45 @@ import android.widget.FrameLayout;
 import android.widget.RelativeLayout;
 import android.widget.Toast;
 
+/**
+ * @file TagRecognitionActivity.java
+ * @brief Main application activity
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
 public class TagRecognitionActivity extends Activity {
 	private static final String TAG = "TagRecognizer";
 	public static final String PREFS_NAME = "TagRecognizerPrefs";
 	
+	/** Camera preview */
 	public Preview _mPreview;
+	/** Hold action currently developed by application. */
 	public Actions _currentAction;
+	/** NDK instance */
 	public NDKWrapper _ndk;
+	/** Timer user to make period actions. */
 	private Timer _timer;
+	/** Help menu */
 	private AlertDialog _helpMenu;
+	/** Progress Dialog instance */
 	private ProgressDialog _progress;
+	/** Instance of BroadcastReceiver implementation */
 	private mReceiver _notification;
-	
-	private String _desk_IP;
-	private int _desk_Port;
-	private int _app_Port;
-	
+	/** Handles PictureCallback event from camera */
 	private JpegCallBack _jpegCallback;
+	
+	/** Configuration variables */
+	private String _desk_IP; //Desktop server IP
+	private int _desk_Port; // Desktop server port
+	private int _app_Port; // Own port server
 
+	/** Interface buttons */
 	private Button _btn_calibrate;
 	private Button _btn_radar;
 	private Button _btn_help;
 	private Button _btn_stop;
 
+	/** Boolean control variables */
 	public Boolean _isAlive; // used to check if the program is still alive
 	public Boolean _working; // used to check if one thread is making a picture
 	private boolean _timerOn; // used to check if the timer was activated
@@ -155,7 +171,9 @@ public class TagRecognitionActivity extends Activity {
 		registerReceiver(_notification, intentFilter);
 	}
 
-	// Create the alert dialog with the help menu
+	/**
+	 *  Create the alert dialog with the help menu
+	 */
 	private void createHelpMenu() {
 		// Get layout
 		LayoutInflater inflater = getLayoutInflater();
@@ -168,7 +186,7 @@ public class TagRecognitionActivity extends Activity {
 		builder.setTitle("TagRecognizer")
 				.setCancelable(true)
 				.setView(dialoglayout)
-				.setIcon(R.raw.tag25)
+				.setIcon(R.drawable.tag25)
 				.setPositiveButton("close",
 						new DialogInterface.OnClickListener() {
 							public void onClick(DialogInterface dialog,
@@ -183,6 +201,9 @@ public class TagRecognitionActivity extends Activity {
 		_helpMenu.show();
 	}
 
+	/**
+	 * Handles the actions related with the search function
+	 */
 	public void functionSearch() {
 		if (_currentAction == Actions.NONE) {
 			// Adjust buttons
@@ -201,9 +222,12 @@ public class TagRecognitionActivity extends Activity {
 
 	}
 
+	/**
+	 * Handles the actions related with the calibration function
+	 */
 	public void functionCalibrate() {
 		if (_currentAction == Actions.NONE) {
-			_progress = ProgressDialog.show(TagRecognitionActivity.this,"", "Calibrating. It can take a while...",true);
+			//_progress = ProgressDialog.show(TagRecognitionActivity.this,"", "Calibrating. It can take a while...",true);
 			// Adjust buttons
 			_btn_calibrate.setEnabled(false);
 			_btn_radar.setEnabled(false);
@@ -215,6 +239,9 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Handles the actions related with the stop search function
+	 */
 	public void functionStopSearch() {
 		if (_currentAction == Actions.RECOGNITION) {
 			// Adjust buttons and state
@@ -225,6 +252,9 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Handles the actions related with send the device view
+	 */
 	public void functionSendView() {
 		if (_currentAction == Actions.NONE) {
 			Toast.makeText(TagRecognitionActivity.this,
@@ -241,6 +271,9 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Reset interface state to initial values
+	 */
 	protected void initialState() {
 		// Adjust buttons
 		_btn_stop.setVisibility(View.GONE);
@@ -253,7 +286,9 @@ public class TagRecognitionActivity extends Activity {
 		_currentAction = Actions.NONE;
 	}
 
-	// Create timer
+	/**
+	 *  Create timer to take picture every 2s and run it
+	 */
 	private void createTimer() {
 		_timer = new Timer();
 		_timer.schedule(new TimerTask() {
@@ -270,7 +305,9 @@ public class TagRecognitionActivity extends Activity {
 		}, 0, 2000);
 	}
 
-	// Delete timer
+	/**
+	 *  Stop timer
+	 */
 	private void cleanTimer() {
 		if (_timer != null) {
 			_timer.cancel();
@@ -278,7 +315,9 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
-	// Make autofocus and do the picture
+	/**
+	 *  Take picture using autofocus
+	 */
 	private void takingPicture() {
 		// because the mCamera could be not already instantiated after onResume
 		if (_mPreview.mCamera != null) {
@@ -299,6 +338,10 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Process image get it by the camera a send it to the server
+	 * @param data Bitmap image
+	 */
 	protected void processView(Bitmap data) {
 		ArrayList<Bitmap> array = new ArrayList<Bitmap>();
 		array.add(data);
@@ -315,8 +358,13 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
+	/**
+	 * Actions associated to the result of calibration.
+	 * Write a toast message and send result to server
+	 * @param success
+	 */
 	protected void processCalibrationResult(boolean success) {
-		_progress.dismiss();
+		//_progress.dismiss();
 		ArrayList<String> s = new ArrayList<String>();
 		if (success) {
 			s.add(Message.CALIBRATION_OK.toString());
@@ -341,6 +389,11 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
+	/**
+	 * * Actions associated to the result of a tag serach.
+	 * Send tags found to the server
+	 * @param tagsinfo
+	 */
 	protected void processTags(String tagsinfo) {
 		// Hold the tags founded
 		ArrayList<Tag> tags = new ArrayList<Tag>();
@@ -391,6 +444,10 @@ public class TagRecognitionActivity extends Activity {
 		}
 	}
 
+	/**
+	 * BroadcastReceiver implementation
+	 * Handles Intent from another activity or intentservice
+	 */
 	public class mReceiver extends BroadcastReceiver {
 		@Override
 		public void onReceive(Context context, Intent intent) {

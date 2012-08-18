@@ -11,6 +11,12 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
+/**
+ * @file CmdReceiver.java
+ * @brief Extends IntentService. Handles the server work. 
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
 public class CmdReceiver extends IntentService {
 	private final static String TAG = "CmdReceiver";
 	public static final String CmdReceiver_IN_MSG = "imsg";
@@ -20,10 +26,16 @@ public class CmdReceiver extends IntentService {
 	public static final int PARAM_STOP = 2;
 	private static ServerThread _server = null;
 
+	/**
+	 * Constructor
+	 */
 	public CmdReceiver() {
 		super("CmdReceiver");
 	}
 
+	/**
+	 * Manage Intent message
+	 */
 	@Override
 	protected void onHandleIntent(Intent intent) {
 		// Get intent value
@@ -32,32 +44,28 @@ public class CmdReceiver extends IntentService {
 		// Select operation
 		switch (cmd) {
 		case PARAM_START:
-			port = intent.getIntExtra(CmdReceiver_PORT_MSG,8000);
-			runServer(port);
+			port = intent.getIntExtra(CmdReceiver_PORT_MSG, 8000);
+			if (_server == null) {
+				_server = new ServerThread(port);
+				Thread sf = new Thread(_server);
+				sf.start();
+			}
 			break;
 		case PARAM_STOP:
-			stopServer();
+			if (_server != null) {
+				_server.closeServer();
+				_server = null;
+			}
 			break;
 		default:
 			break;
 		}
 	}
 
-	void runServer( int port ) {
-		if (_server == null) {
-			_server = new ServerThread(port);
-			Thread sf = new Thread(_server);
-			sf.start();
-		}
-	}
-
-	void stopServer() {
-		if (_server != null) {
-			_server.closeServer();
-			_server = null;
-		}
-	}
-
+	/**
+	 * Send the command received to the main activity
+	 * @param cmd
+	 */
 	void sendCmd(String cmd) {
 		Intent i = new Intent();
 		Bundle bundle = new Bundle();
@@ -67,15 +75,29 @@ public class CmdReceiver extends IntentService {
 		this.sendBroadcast(i);
 	}
 
+	/**
+	 * @brief Implements runnable server thread. 
+	 * @author Antonio Manuel Gutierrez Martinez
+ 	 * @version 1.0
+	 */
 	public class ServerThread implements Runnable {
+		/** Server port */
 		private int SERVERPORT = 8000;
+		/** Server socket */
 		private ServerSocket _serverSocket;
 
-		public ServerThread( int port ) {
+		/**
+		 * Constructor
+		 * @param port where create the server
+		 */
+		public ServerThread(int port) {
 			SERVERPORT = port;
 			_serverSocket = null;
 		}
 
+		/**
+		 * Thread process
+		 */
 		public void run() {
 			try {
 				_serverSocket = new ServerSocket(SERVERPORT);
@@ -136,6 +158,9 @@ public class CmdReceiver extends IntentService {
 
 		}
 
+		/**
+		 * Close server
+		 */
 		public void closeServer() {
 			if (_serverSocket != null) {
 				try {

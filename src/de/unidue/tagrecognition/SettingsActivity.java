@@ -12,14 +12,23 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
 
+/**
+ * @file SettingsActivity.java
+ * @brief Android activity to manage configuration variables.
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
 public class SettingsActivity extends Activity {
 	public static final String SettingActivitiy_MSG = "setting_msg";
 	public static final String SettingActivitiy_DATA = "CHANGES";
+
+	/** Pattern to check IP format. */
 	private static final String IPADDRESS_PATTERN = "^([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])\\."
 			+ "([01]?\\d\\d?|2[0-4]\\d|25[0-5])$";
 
+	/** Interface elements */
 	private Button _btn_accept;
 	private Button _btn_cancel;
 
@@ -34,18 +43,31 @@ public class SettingsActivity extends Activity {
 	private EditText _txt_ip;
 	private CheckBox _ck_debug;
 
+	/** Number of rows in tags */
 	private int _rows;
+	/** Number of cols in tags */
 	private int _cols;
+	/** Tag width, in cm */
 	private float _tag_width;
+	/** Tag height, in cm */
 	private float _tag_height;
+	/** Tag border size, in cm */
 	private float _tag_border;
+	/** Holds debug mode */
 	private boolean _debugMode;
+	/** Tag template to calibrate colours thresholds */
 	private String _template;
+	/** Desktop server IP */
 	private String _desk_IP;
+	/** Desktop server Port */
 	private int _desk_Port;
+	/** Port for android application server */
 	private int _app_Port;
 
 	@Override
+	/**
+	 *  Actions made on create activity
+	 */
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		// Hide the window title.
@@ -118,6 +140,9 @@ public class SettingsActivity extends Activity {
 
 	}
 
+	/**
+	 * Fill the elements of interface with values from SharedPreferences
+	 */
 	private void setFieldsValues() {
 		// Restore preferences
 		SharedPreferences settings = getSharedPreferences(
@@ -144,6 +169,10 @@ public class SettingsActivity extends Activity {
 			_ck_debug.setChecked(false);
 	}
 
+	/**
+	 * Fill the internal variable values with the values from the interface
+	 * elements.
+	 */
 	private void getFieldsValues() {
 		_template = _txt_template.getText().toString();
 		_rows = Integer.parseInt(_txt_rows.getText().toString());
@@ -159,6 +188,10 @@ public class SettingsActivity extends Activity {
 		_debugMode = _ck_debug.isChecked();
 	}
 
+	/**
+	 * Check if the values of variables are correct.
+	 * @return a string indicating the fail found or an empty string otherwise.
+	 */
 	private String checkValues() {
 		String errors = "";
 		if (_rows <= 0) {
@@ -184,6 +217,10 @@ public class SettingsActivity extends Activity {
 		return errors;
 	}
 
+	/**
+	 * Store the values of internal variables in SharedPreferences system of
+	 * Android.
+	 */
 	private void setPrefrencesValues() {
 		// Get editor
 		SharedPreferences settings = getSharedPreferences(

@@ -6,16 +6,27 @@ import java.util.List;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.hardware.Camera;
+import android.hardware.Camera.Size;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
+/**
+ * @file Preview.java
+ * @brief Implementation of a SurfaceHolder.Callback. Set the configuration parameters
+ * of camera and preview.
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
 class Preview extends SurfaceView implements SurfaceHolder.Callback {
 	private static final String TAG = "Preview";
-	SurfaceHolder mHolder;
+	private SurfaceHolder mHolder;
 	public Camera mCamera;
 
-	Preview(Context context) {
+	/**
+	 * Class constructor
+	 */
+	public Preview(Context context) {
 		super(context);
 		// Install a SurfaceHolder.Callback so we get notified when the
 		// underlying surface is created and destroyed.
@@ -24,7 +35,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
 	}
 
-	// Called once the holder is ready
+	/**
+	 *  Called once the holder is ready
+	 */
 	public void surfaceCreated(SurfaceHolder holder) {
 		// The Surface has been created, acquire the camera and tell it where to
 		// draw.
@@ -49,11 +62,6 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 				+ p.getPictureSize().width);
 		mCamera.setParameters(p);
 
-		/*
-		 * for (Size i : p.getSupportedPictureSizes()) Log.d("debug", "size: " +
-		 * i.height + "x" + i.width);
-		 */
-
 		try {
 			mCamera.setPreviewDisplay(holder);
 			mCamera.startPreview();
@@ -66,7 +74,9 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 
 	}
 
-	// Called when the holder is destroyed
+	/**
+	 *  Called when the holder is destroyed
+	 */
 	public void surfaceDestroyed(SurfaceHolder holder) {
 		if (mCamera != null) {
 			mCamera.stopPreview();
@@ -75,8 +85,10 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 	}
 
-	// Get optimal size for preview
-	/*
+	/**
+	 * Get optimal size for preview
+	 */
+	@SuppressWarnings("unused")
 	private Size getOptimalPreviewSize(List<Size> sizes, int w, int h) {
 		final double ASPECT_TOLERANCE = 0.05;
 		double targetRatio = (double) w / h;
@@ -111,11 +123,12 @@ class Preview extends SurfaceView implements SurfaceHolder.Callback {
 		}
 		return optimalSize;
 	}
-	*/
-	// Called when holder has changed
+
+	/**
+	 *  Called when holder has changed
+	 *  Unused for problems with autofocus
+	 */
 	public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-		// stop preview before making changes-- Disable for problems with
-		// Autofocus
 		/*
 		 * try { mCamera.stopPreview(); } catch (Exception e) { Log.d(TAG,
 		 * "Error stopping camera preview: " + e.getMessage()); }

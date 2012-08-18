@@ -1,7 +1,7 @@
 /**
  * @file cv-image.h
  * @brief Implementation of operations to read and write images from Java to C++ and viceversa via
- * JNI. It also split the image read in three channels of color.
+ * JNI. It also split the image read in three channels of colour.
  * @author Antonio Manuel Gutierrez Martinez
  * @version 1.0
  */

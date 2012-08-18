@@ -40,7 +40,7 @@
            android:layout_height="wrap_content"
            android:contentDescription="@string/separator_description"
            android:padding="5dp"
-           android:src="@raw/line_separator" />
+           android:src="@drawable/line_separator" />
        
         <!-- server layout -->
        <TextView

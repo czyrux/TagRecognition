@@ -16,16 +16,35 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
-//Handles data for jpeg picture
+/**
+ * @file JpegCallBack.java
+ * @brief Implements of PictureCallBack interface. Handles the jpeg image captured by the mobile camera
+ * @author Antonio Manuel Gutierrez Martinez
+ * @version 1.0
+ */
 public class JpegCallBack implements PictureCallback {
+	/** Label string to log proposes. */
 	private final String TAG = "JpegCallBack";
+
+	/** Reference to called activity */
 	private TagRecognitionActivity _activity;
 
+	/**
+	 * Constructor
+	 * @param activity: reference to called activity
+	 */
 	public JpegCallBack(TagRecognitionActivity activity) {
 		_activity = activity;
 	}
 
 	@Override
+	/**
+	 * Called when image data is available after a picture is taken. The format
+	 * of the data depends on the context of the callback and Camera.Parameters
+	 * settings.
+	 * @param data: a byte array of the picture data
+	 * @param camera: the Camera service object
+	 */
 	public void onPictureTaken(byte[] data, Camera camera) {
 		// checked if the activity is still alive
 		synchronized (camera) {
@@ -46,12 +65,6 @@ public class JpegCallBack implements PictureCallback {
 
 		Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length,
 				options);
-
-		/*
-		 * Rotate the image to 90 Matrix mtx = new Matrix(); mtx.postRotate(90);
-		 * Rotating Bitmap Bitmap bmpRotate = Bitmap.createBitmap(bmp, 0,0,
-		 * bmp.getWidth(), bmp.getHeight(), mtx, true);
-		 */
 
 		// Select operation
 		String tags;
@@ -78,13 +91,6 @@ public class JpegCallBack implements PictureCallback {
 				Toast.LENGTH_LONG).show();
 		Log.d(TAG, elapse.toString() + " ms");
 
-		// WITH ROTATE OUTSIDE = 800 MS
-		// SIN ROTATE 600 MS
-		// WITH ROTATE INSIDE = 800ms
-		// Filter image
-		// 208 ms jni
-		// 1700 ms java
-
 		// Continue with the preview
 		_activity._mPreview.mCamera.startPreview();
 
@@ -94,6 +100,10 @@ public class JpegCallBack implements PictureCallback {
 		}
 	}
 
+	/**
+	 * Store the Bitmap object image 
+	 * @param bmp Bitmap object
+	 */
 	@SuppressWarnings("unused")
 	private void storeBitmap(Bitmap bmp, String head) {
 		int quality = 100;
@@ -119,7 +129,10 @@ public class JpegCallBack implements PictureCallback {
 		}
 	}
 
-	// Create a File for saving an image
+	/**
+	 * Create a File for saving an image
+	 * @param head Head added to file name
+	 */
 	private File getOutputMediaFile(String head) {
 		// To be safe, you should check that the SDCard is mounted
 		// using Environment.getExternalStorageState() before doing this.

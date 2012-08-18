@@ -2,13 +2,13 @@
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item 
         android:state_pressed="true"
-        android:drawable="@raw/calibrate38gray" />
+        android:drawable="@drawable/calibrate38gray" />
     <item 
         android:state_enabled="false"
-        android:drawable="@raw/calibrate38gray" />
+        android:drawable="@drawable/calibrate38gray" />
     <item
         android:state_focused="true" 
-        android:drawable="@raw/calibrate38gray" />
+        android:drawable="@drawable/calibrate38gray" />
     <item 
-        android:drawable="@raw/calibrate38" />
+        android:drawable="@drawable/calibrate38" />
 </selector>

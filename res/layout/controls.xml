@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
-        android:drawableTop="@drawable/calibrate_button" 
+        android:drawableTop="@layout/calibrate_button" 
         android:text="@string/btn_calibrate_label"
         android:contentDescription="@string/btn_calibrate_description"
         style="@style/btn_style"
@@ -25,7 +25,7 @@
         android:layout_alignParentBottom="true"
         android:contentDescription="@string/btn_radar_description"
         android:text="@string/btn_radar_label"
-        android:drawableTop="@drawable/radar_button" 
+        android:drawableTop="@layout/radar_button" 
         style="@style/btn_style"/>
     
     <Button
@@ -34,7 +34,7 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:drawableTop="@raw/help38" 
+        android:drawableTop="@drawable/help38" 
         android:contentDescription="@string/btn_help_description"
         android:text="@string/btn_help_label"
         style="@style/btn_style"/>
@@ -45,7 +45,7 @@
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_alignParentBottom="true"
-        android:drawableTop="@raw/stop38" 
+        android:drawableTop="@drawable/stop38" 
         android:contentDescription="@string/btn_stop_description"
         android:text="@string/btn_stop_label"
         style="@style/btn_style"/>

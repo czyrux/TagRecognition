@@ -20,7 +20,7 @@
            android:layout_height="wrap_content"
            android:contentDescription="@string/separator_description"
            android:padding="5dp"
-           android:src="@raw/line_separator" />
+           android:src="@drawable/line_separator" />
        
        <!-- tags layout -->
        <include 
@@ -31,7 +31,7 @@
            android:layout_height="wrap_content"
            android:contentDescription="@string/separator_description"
            android:padding="5dp"
-           android:src="@raw/line_separator" />
+           android:src="@drawable/line_separator" />
        
        <!-- debug layout -->
        
@@ -44,7 +44,7 @@
            android:layout_height="wrap_content"
            android:contentDescription="@string/separator_description"
            android:padding="5dp"
-           android:src="@raw/line_separator" />
+           android:src="@drawable/line_separator" />
        
        <!-- buttons layout -->
        <LinearLayout
@@ -57,14 +57,14 @@
             	android:layout_width="wrap_content"
             	android:layout_height="wrap_content"
             	android:text="@string/btn_stt_accept"
-            	android:drawableLeft="@raw/check19" />
+            	android:drawableLeft="@drawable/check19" />
 
         	<Button
             	android:id="@+id/btn_cancel"
             	android:layout_width="wrap_content"
             	android:layout_height="wrap_content"
             	android:text="@string/btn_stt_cancel"
-            	android:drawableLeft="@raw/cancel19" />
+            	android:drawableLeft="@drawable/cancel19" />
 
     </LinearLayout>
 
