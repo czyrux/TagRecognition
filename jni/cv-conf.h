@@ -22,9 +22,9 @@ extern int LIMIT_ROTATION;
 /** Minimum rectangle size allow in order to consider the contour a rectangle. Size in pixels */
 extern int MIN_RECT_SIZE;
 /** Width of horizontal border concerning to the tag height. */
-extern int WIDTH_BORDER;
+extern float WIDTH_BORDER;
 /** Width of vertical border concerning to the tag width. */
-extern int HEIGHT_BORDER;
+extern float HEIGHT_BORDER;
 
 /** Debug mode. */
 extern bool DEBUG;

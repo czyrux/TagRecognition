@@ -70,13 +70,9 @@ struct Image_data {
  * @param pixels Image as an array of integers.
  * @param width Width of image.
  * @param height Height of image.
- * @param red_filter Boolean value that indicates if the red channel must be calculated.
- * @param blue_filter Boolean value that indicates if the blue channel must be calculated.
- * @param green_filter Boolean value that indicates if the green channel must be calculated.
  * @return Pointer to image_data struct
  */
-Image_data* loadPixelsFiltered(int* pixels, int width, int height , 
-  bool red_filter=true , bool green_filter=true , bool blue_filter=true);
+Image_data* loadPixelsFiltered(int* pixels, int width, int height );
 
 /**
  * Convert a image stored in a jintArray in a Image_data struct.

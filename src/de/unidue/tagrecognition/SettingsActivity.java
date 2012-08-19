@@ -1,9 +1,15 @@
 package de.unidue.tagrecognition;
 
+import java.io.File;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -163,7 +169,7 @@ public class SettingsActivity extends Activity {
 				.toString());
 		_txt_ip.setText(settings.getString("desk_IP", "192.168.137.1"));
 
-		if (settings.getBoolean("debugMode", true))
+		if (settings.getBoolean("debugMode", false))
 			_ck_debug.setChecked(true);
 		else
 			_ck_debug.setChecked(false);
@@ -190,6 +196,7 @@ public class SettingsActivity extends Activity {
 
 	/**
 	 * Check if the values of variables are correct.
+	 * 
 	 * @return a string indicating the fail found or an empty string otherwise.
 	 */
 	private String checkValues() {
@@ -212,6 +219,9 @@ public class SettingsActivity extends Activity {
 			errors = "App Port invalid";
 		} else if (!_desk_IP.matches(IPADDRESS_PATTERN)) {
 			errors = "Ip format invalid";
+		} else if (_debugMode) {
+			if (!createDebugDirectory())
+				errors = "Debug directory cannot be created";
 		}
 
 		return errors;
@@ -240,5 +250,36 @@ public class SettingsActivity extends Activity {
 
 		// Commit the edits!
 		editor.commit();
+	}
+
+	/**
+	 * Create a debug directory where the image will be placed if it is not
+	 * already created.
+	 * 
+	 * @return Success of operation
+	 */
+	private boolean createDebugDirectory() {
+		boolean success = true;
+		String state = Environment.getExternalStorageState();
+		if (Environment.MEDIA_MOUNTED.equals(state)) {
+			// Make the path to a directory with name MyCameraApp in the
+			// directory
+			// of pictures
+			File mediaStorageDir = new File(
+					Environment
+							.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES),
+					"TagRecognizerApp");
+
+			// Create the storage directory if it does not exist
+			if (!mediaStorageDir.exists()) {
+				if (!mediaStorageDir.mkdirs()) {
+					success = false;
+				}
+			}
+		} else {
+			success = false;
+		}
+
+		return success;
 	}
 }

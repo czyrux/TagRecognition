@@ -7,17 +7,16 @@ int BLUE_THRESHOLD = -20;
 int GREEN_THRESHOLD = -60;
 
 /**************************************/
-Image_data* loadPixelsFiltered(int* pixels, int width, int height,
-								bool red_filter , bool green_filter , bool blue_filter ) 
+Image_data* loadPixelsFiltered(int* pixels, int width, int height ) 
 {
 	IplImage *img = NULL, *img_red = NULL, *img_green = NULL, *img_blue= NULL;
 	uchar *base = NULL , *ptr = NULL, R , G , B ;
 	int diff;
 
 	//Create images to store data
-	if(red_filter) 	img_red 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
-	if(green_filter)img_green 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1); 
-	if(blue_filter) img_blue 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
+	img_red 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
+	img_green 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1); 
+	img_blue 	= cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 1);
 	if (DEBUG) {
 		img = cvCreateImage(cvSize(width, height), IPL_DEPTH_8U, 3);
 		base = (uchar*) (img->imageData);
@@ -41,25 +40,19 @@ Image_data* loadPixelsFiltered(int* pixels, int width, int height,
 			}
 			
 			//to take RED colours, have more Red than Green and Blue together
-			if ( red_filter ) {
-				diff = R - (G+B);
-				((uchar *)(img_red->imageData + y*img_red->widthStep))[x] 
-				= (diff > RED_THRESHOLD)? 0x00 : 0xFF ; //black : white
-			}
+			diff = R - (G+B);
+			((uchar *)(img_red->imageData + y*img_red->widthStep))[x] =
+				(diff > RED_THRESHOLD)? 0x00 : 0xFF ; //black : white
 			
 			//to take GREEN colours
-			if ( green_filter ) {
-				diff = G - (R+B);
-				((uchar *)(img_green->imageData + y*img_green->widthStep))[x] 
-				= ( diff > GREEN_THRESHOLD )? 0x00 : 0xFF ; //black : white
-			}
+			diff = G - (R+B);
+			((uchar *)(img_green->imageData + y*img_green->widthStep))[x] =
+				( diff > GREEN_THRESHOLD )? 0x00 : 0xFF ; //black : white
 			
 			//to take BLUE colours
-			if ( blue_filter ) {
-				diff = B - (G+R);
-				((uchar *)(img_blue->imageData + y*img_blue->widthStep))[x]= 
+			diff = B - (G+R);
+			((uchar *)(img_blue->imageData + y*img_blue->widthStep))[x] = 
 				( diff > BLUE_THRESHOLD )? 0x00 : 0xFF ; //black : white
-			}
 		}
 	}
 

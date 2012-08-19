@@ -94,7 +94,7 @@ public class TagRecognitionActivity extends Activity {
 		float tag_width = settings.getFloat("tag_width", 8.0f);
 		float tag_height = settings.getFloat("tag_height", 4.5f);
 		float tag_border = settings.getFloat("tag_border", 1.0f);
-		boolean debugMode = settings.getBoolean("debugMode", true);
+		boolean debugMode = settings.getBoolean("debugMode", false);
 		String template = settings.getString("templateTag", "12321113");
 		_desk_IP = settings.getString("desk_IP", "192.168.137.1");
 		_desk_Port = settings.getInt("desk_Port", 8080);
@@ -106,6 +106,7 @@ public class TagRecognitionActivity extends Activity {
 		_notification = null;
 		_mPreview = new Preview(this);
 		_timer = null;
+		_progress = null;
 		_helpMenu = null;
 		_jpegCallback = new JpegCallBack(this);
 
@@ -227,7 +228,9 @@ public class TagRecognitionActivity extends Activity {
 	 */
 	public void functionCalibrate() {
 		if (_currentAction == Actions.NONE) {
-			//_progress = ProgressDialog.show(TagRecognitionActivity.this,"", "Calibrating. It can take a while...",true);
+			_progress = ProgressDialog.show(TagRecognitionActivity.this,"", 
+					"Calibrating. It can take a while...Please don't close the application. ",
+					true);
 			// Adjust buttons
 			_btn_calibrate.setEnabled(false);
 			_btn_radar.setEnabled(false);
@@ -364,7 +367,7 @@ public class TagRecognitionActivity extends Activity {
 	 * @param success
 	 */
 	protected void processCalibrationResult(boolean success) {
-		//_progress.dismiss();
+		_progress.dismiss();
 		ArrayList<String> s = new ArrayList<String>();
 		if (success) {
 			s.add(Message.CALIBRATION_OK.toString());
